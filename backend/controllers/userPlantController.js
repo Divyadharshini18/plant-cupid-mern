@@ -56,7 +56,7 @@ exports.addUserPlant = async (req, res) => {
 
 /* -------------------- GET USER PLANTS -------------------- */
 exports.getUserPlants = async (req, res) => {
-  const plants = await UserPlant.find({ user: req.user }).populate("plant");
+  const plants = await UserPlant.find({ user: req.user }).populate("plant"); // populate is used to replace the plant field with the actual plant document from the Plant collection based on the reference
 
   const response = plants.map((up) => ({
     _id: up._id,
@@ -87,7 +87,7 @@ exports.waterPlant = async (req, res) => {
     const lastWatered = wateredHistory[wateredHistory.length - 1].date;
     const nextAllowed = new Date(
       lastWatered.getTime() +
-        plant.waterFrequencyDays * 24 * 60 * 60 * 1000
+        plant.waterFrequencyDays * 24 * 60 * 60 * 1000 // JS calculates days in milliseconds
     );
 
     if (new Date() < nextAllowed) {
@@ -99,7 +99,7 @@ exports.waterPlant = async (req, res) => {
   }
 
   userPlant.wateredHistory.push({ date: new Date() });
-  await userPlant.save();
+  await userPlant.save(); // save is used to persist the changes in the DB
 
   res.json({
     message: "Plant watered successfully 💧",
@@ -166,7 +166,7 @@ const calculateReminder = (userPlant) => {
   const daysLeft = Math.max(
     Math.ceil(diffMs / (1000 * 60 * 60 * 24)),
     0
-  );
+  ); // ignore negative days
 
   return { nextWaterDate, daysLeft };
 };

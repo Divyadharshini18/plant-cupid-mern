@@ -13,7 +13,7 @@ const connectDB = async () => { // async functions are functions that return a p
 module.exports = connectDB; // exporting the connectDB function to be used in other files
 
 // process refers to the current Node.js process
-// exit(1) is used to exit the process with a failure code and 0 for sucess
+// exit(1) is used to exit the process with a failure code and 0 for success
 
 // promise are object that will available later in the future that allows JS to continue running and come back when task finshes
 // promise has three states: pending, fulfilled, rejected
