@@ -3,11 +3,9 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 
 dotenv.config();
-
 connectDB();
 
 const app = express();
-
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -16,9 +14,12 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
+const authRoutes = require("./routes/authRoutes");
+
+app.use("/api/auth", authRoutes);
+
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-const User = require("./models/User");
-console.log("User model loaded:", User.modelName);
