@@ -15,8 +15,13 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 const authRoutes = require("./routes/authRoutes");
-
 app.use("/api/auth", authRoutes);
+
+const userRoutes = require("./routes/userRoutes");
+app.use("/api/users", userRoutes);
+
+const plantRoutes = require("./routes/plantRoutes");
+app.use("/api/plants", plantRoutes);
 
 
 app.listen(PORT, () => {
