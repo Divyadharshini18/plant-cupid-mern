@@ -12,6 +12,19 @@ const userPlantSchema = new mongoose.Schema(
       ref: "Plant",
       required: true,
     },
+    lastWatered: {
+      type: Date,
+    },
+
+    wateredHistory: [
+      {
+        date: {
+          type: Date,
+          required: true,
+        },
+      },
+    ],
+
     nickname: String,
     lastWatered: Date,
     nextWatering: Date,
