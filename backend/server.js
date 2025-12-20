@@ -23,6 +23,8 @@ app.use("/api/users", userRoutes);
 const plantRoutes = require("./routes/plantRoutes");
 app.use("/api/plants", plantRoutes);
 
+const userPlantRoutes = require("./routes/userPlantRoutes");
+app.use("/api/user-plants", userPlantRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
