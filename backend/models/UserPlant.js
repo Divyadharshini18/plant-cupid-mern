@@ -12,8 +12,17 @@ const userPlantSchema = new mongoose.Schema(
       ref: "Plant",
       required: true,
     },
-    lastWatered: {
-      type: Date,
+
+    nickname: {
+      type: String,
+      trim: true,
+      maxlength: 50,
+    },
+
+    notes: {
+      type: String,
+      trim: true,
+      maxlength: 500,
     },
 
     wateredHistory: [
@@ -24,13 +33,11 @@ const userPlantSchema = new mongoose.Schema(
         },
       },
     ],
-
-    nickname: String,
-    lastWatered: Date,
-    nextWatering: Date,
-    notes: String,
   },
   { timestamps: true }
 );
+
+// Prevent duplicate plant per user
+userPlantSchema.index({ user: 1, plant: 1 }, { unique: true });
 
 module.exports = mongoose.model("UserPlant", userPlantSchema);

@@ -1,16 +1,39 @@
 const UserPlant = require("../models/UserPlant");
 const Plant = require("../models/Plant");
+const mongoose = require("mongoose");
 
 exports.addUserPlant = async (req, res) => {
   const { plantId, nickname } = req.body;
 
-  const userPlant = await UserPlant.create({
-    user: req.user,
-    plant: plantId,
-    nickname,
-  });
+  // 1️⃣ Validate input BEFORE DB call
+  if (!mongoose.Types.ObjectId.isValid(plantId)) {
+    return res.status(400).json({ message: "Invalid plant ID" });
+  }
 
-  res.status(201).json(userPlant);
+  if (nickname && nickname.length > 50) {
+    return res.status(400).json({ message: "Nickname too long" });
+  }
+
+  try {
+    // 2️⃣ Create user-plant relation
+    const userPlant = await UserPlant.create({
+      user: req.user,
+      plant: plantId,
+      nickname,
+    });
+
+    res.status(201).json(userPlant);
+  } catch (error) {
+    // 3️⃣ Handle duplicate entry
+    if (error.code === 11000) {
+      return res
+        .status(400)
+        .json({ message: "Plant already added to your collection" });
+    }
+
+    // 4️⃣ Fallback error
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.getUserPlants = async (req, res) => {
