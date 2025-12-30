@@ -56,3 +56,43 @@ exports.waterPlant = async (req, res) => {
     nextWaterInDays: plant.waterFrequencyDays,
   });
 };
+
+exports.updateUserPlant = async (req, res) => {
+  const { nickname } = req.body;
+
+  if (!nickname || nickname.trim() === "") {
+    return res.status(400).json({ message: "Nickname cannot be empty" });
+  }
+
+  const userPlant = await UserPlant.findById(req.params.id);
+
+  if (!userPlant) {
+    return res.status(404).json({ message: "User plant not found" });
+  }
+
+  if (userPlant.user.toString() !== req.user) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  userPlant.nickname = nickname;
+  await userPlant.save();
+
+  res.json(userPlant);
+};
+
+exports.deleteUserPlant = async (req, res) => {
+  const userPlant = await UserPlant.findById(req.params.id);
+
+  if (!userPlant) {
+    return res.status(404).json({ message: "User plant not found" });
+  }
+
+  if (userPlant.user.toString() !== req.user) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  await userPlant.deleteOne();
+
+  res.json({ message: "Plant removed from your collection 🪴" });
+};
+
