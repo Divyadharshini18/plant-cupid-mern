@@ -15,7 +15,20 @@ exports.addUserPlant = async (req, res) => {
 
 exports.getUserPlants = async (req, res) => {
   const plants = await UserPlant.find({ user: req.user }).populate("plant");
-  res.json(plants);
+
+  const response = plants.map((userPlant) => {
+    const reminder = calculateReminder(userPlant);
+
+    return {
+      _id: userPlant._id,
+      nickname: userPlant.nickname,
+      plant: userPlant.plant,
+      reminder,
+      wateredHistory: userPlant.wateredHistory,
+    };
+  });
+
+  res.json(response);
 };
 
 exports.waterPlant = async (req, res) => {
@@ -94,5 +107,28 @@ exports.deleteUserPlant = async (req, res) => {
   await userPlant.deleteOne();
 
   res.json({ message: "Plant removed from your collection 🪴" });
+};
+
+const calculateReminder = (userPlant) => {
+  const frequency = userPlant.plant.waterFrequencyDays;
+
+  if (userPlant.wateredHistory.length === 0) {
+    return {
+      nextWaterDate: new Date(),
+      daysLeft: 0,
+    };
+  }
+
+  const lastWatered =
+    userPlant.wateredHistory[userPlant.wateredHistory.length - 1].date;
+
+  const nextWaterDate = new Date(
+    lastWatered.getTime() + frequency * 24 * 60 * 60 * 1000
+  );
+
+  const diffMs = nextWaterDate - new Date();
+  const daysLeft = Math.max(Math.ceil(diffMs / (1000 * 60 * 60 * 24)), 0);
+
+  return { nextWaterDate, daysLeft };
 };
 
