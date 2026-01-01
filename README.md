@@ -26,7 +26,7 @@ focusing on clean data modeling, authentication, and domain logic.
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 **Frontend:** React (planned)  
 **Backend:** Node.js, Express.js  
