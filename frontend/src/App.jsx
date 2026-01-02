@@ -4,10 +4,16 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AddPlant from "./pages/AddPlant";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Navbar from "./components/Navbar";
+import { useAuth } from "./context/AuthContext";
 
 function App() {
+  const { user } = useAuth();
+
   return (
     <Router>
+      {user && <Navbar />}
+
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
