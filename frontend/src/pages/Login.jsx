@@ -1,37 +1,32 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import api from "../api/api";
-import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  console.log("Login: Rendering");
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth();
-  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleLogin = async () => {
+    console.log("Login: Attempting login");
     try {
-      const res = await api.post("/users/login", {
-        email,
-        password,
-      });
-
-      login(res.data.user, res.data.token);
-      navigate("/dashboard");
+      const res = await api.post("/users/login", { email, password });
+      console.log("LOGIN SUCCESS:", res.data);
+      localStorage.setItem("token", res.data.token);
+      console.log("Login: Token stored in localStorage");
+      // No redirects yet - just store token
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
+      console.error("LOGIN FAILED", err.response?.data);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       <h2>Login</h2>
-      <input
+      <input 
         placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        value={email} 
+        onChange={(e) => setEmail(e.target.value)} 
       />
       <input
         type="password"
@@ -39,7 +34,7 @@ export default function Login() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button type="submit">Login</button>
-    </form>
+      <button onClick={handleLogin}>Login</button>
+    </div>
   );
 }

@@ -1,40 +1,72 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+  console.log("AuthContext: Initializing");
+  
+  // Initialize user state from localStorage token if available
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Check for token on mount (only once)
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
-
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
+    console.log("AuthContext: Checking for token in localStorage");
+    const token = localStorage.getItem("token");
+    if (token) {
+      console.log("AuthContext: Token found, setting user");
+      // For now, just set a basic user object
+      // In future, you can decode token here if needed
+      setUser({ token, email: "User" });
+    } else {
+      console.log("AuthContext: No token found");
     }
-  }, []);
+    setIsLoading(false);
+  }, []); // Empty dependency array - only run once on mount
 
-  const login = (userData, jwtToken) => {
+  const login = (userData) => {
+    console.log("AuthContext: Login called", userData);
     setUser(userData);
-    setToken(jwtToken);
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", jwtToken);
   };
 
   const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem("user");
+    console.log("AuthContext: Logout called");
     localStorage.removeItem("token");
+    setUser(null);
   };
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({
+    user,
+    token: user?.token || localStorage.getItem("token"),
+    login,
+    logout,
+    isLoading
+  }), [user, isLoading]);
+
+  console.log("AuthContext: Rendering provider with value", value);
+
+  // Always render children - don't block rendering during loading
+  // The loading state is just for components that need to know
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    console.error("useAuth must be used within AuthProvider");
+    // Return safe defaults instead of throwing
+    return {
+      user: null,
+      token: null,
+      login: () => {},
+      logout: () => {},
+      isLoading: false
+    };
+  }
+  return context;
+};
