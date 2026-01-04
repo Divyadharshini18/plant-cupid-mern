@@ -1,31 +1,20 @@
-import { useAuth } from "../context/AuthContext";
-
 export default function Dashboard() {
   console.log("Dashboard: Rendering");
   
-  const { user, logout, token } = useAuth();
+  // Safely read token from localStorage
+  let token = null;
+  try {
+    token = localStorage.getItem("token");
+  } catch (err) {
+    console.error("Dashboard: Error reading localStorage", err);
+  }
   
-  // Fallback to localStorage if context doesn't have token
-  const localStorageToken = localStorage.getItem("token");
-  const hasToken = token || localStorageToken;
-  const userEmail = user?.email || (hasToken ? "User logged in" : "Not logged in");
-
-  const handleLogout = () => {
-    console.log("Dashboard: Logging out");
-    if (logout) {
-      logout();
-    } else {
-      localStorage.removeItem("token");
-    }
-    window.location.href = "/login";
-  };
+  const status = token ? "Logged in" : "Guest";
 
   return (
     <div>
       <h1>Dashboard</h1>
-      <p>User: {userEmail}</p>
-      <p>Token exists: {hasToken ? "Yes" : "No"}</p>
-      {hasToken && <button onClick={handleLogout}>Logout</button>}
+      <p>Status: {status}</p>
     </div>
   );
 }
