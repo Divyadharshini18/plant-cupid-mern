@@ -11,17 +11,37 @@ export default function Login() {
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    console.log("Login: Attempting login");
+    console.log("Login: Attempting login with email:", email);
     setError(""); // Clear previous errors
     
+    // Validate inputs
+    if (!email || !password) {
+      const errorMsg = "Please enter both email and password";
+      console.error("Login: Validation failed -", errorMsg);
+      setError(errorMsg);
+      return;
+    }
+    
     try {
-      const res = await api.post("/users/login", { email, password });
-      console.log("LOGIN SUCCESS:", res.data);
+      console.log("Login: Sending POST request to /auth/login");
+      const res = await api.post("/auth/login", { email, password });
+      console.log("LOGIN SUCCESS:", {
+        status: res.status,
+        hasToken: !!res.data.token,
+        userEmail: res.data.email
+      });
+      
+      // Verify token exists in response
+      if (!res.data.token) {
+        console.error("Login: No token in response", res.data);
+        setError("Login successful but no token received. Please try again.");
+        return;
+      }
       
       // Save token to localStorage
       try {
         localStorage.setItem("token", res.data.token);
-        console.log("Login: Token saved to localStorage");
+        console.log("Login: Token saved to localStorage successfully");
       } catch (storageErr) {
         console.error("Login: Failed to save token to localStorage", storageErr);
         setError("Failed to save login session. Please try again.");
@@ -29,11 +49,29 @@ export default function Login() {
       }
       
       // Redirect to dashboard
+      console.log("Login: Redirecting to /dashboard");
       navigate("/dashboard");
     } catch (err) {
-      console.error("LOGIN FAILED:", err.response?.data || err.message);
-      const errorMessage = err.response?.data?.message || "Login failed. Please try again.";
-      setError(errorMessage);
+      // Handle different error types
+      if (err.response) {
+        // Server responded with error status
+        const status = err.response.status;
+        const errorData = err.response.data;
+        console.error("LOGIN FAILED:", {
+          status,
+          message: errorData?.message,
+          data: errorData
+        });
+        setError(errorData?.message || `Login failed (${status}). Please try again.`);
+      } else if (err.request) {
+        // Request made but no response (network error)
+        console.error("LOGIN FAILED: No response from server", err.request);
+        setError("Cannot connect to server. Please check your connection.");
+      } else {
+        // Other error
+        console.error("LOGIN FAILED: Unexpected error", err.message);
+        setError("An unexpected error occurred. Please try again.");
+      }
     }
   };
 
