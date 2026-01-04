@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   console.log("Login: Rendering");
   
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -38,15 +40,15 @@ export default function Login() {
         return;
       }
       
-      // Save token to localStorage
-      try {
-        localStorage.setItem("token", res.data.token);
-        console.log("Login: Token saved to localStorage successfully");
-      } catch (storageErr) {
-        console.error("Login: Failed to save token to localStorage", storageErr);
-        setError("Failed to save login session. Please try again.");
-        return;
-      }
+      // Extract user data from response (backend returns: _id, name, email, token)
+      const userData = {
+        _id: res.data._id,
+        name: res.data.name,
+        email: res.data.email
+      };
+      
+      // Use AuthContext to store user and token (handles localStorage automatically)
+      login(userData, res.data.token);
       
       // Redirect to dashboard
       console.log("Login: Redirecting to /dashboard");

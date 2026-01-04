@@ -4,10 +4,16 @@ import { useAuth } from "../context/AuthContext";
 export default function ProtectedRoute({ children }) {
   console.log("ProtectedRoute: Checking authentication");
   
-  // Safely get isAuthenticated from context (returns false if context is missing)
-  const { isAuthenticated } = useAuth();
+  // Safely get auth state from context (returns safe defaults if context is missing)
+  const { isAuthenticated, isLoading } = useAuth();
 
-  console.log("ProtectedRoute: Authentication status", { isAuthenticated });
+  console.log("ProtectedRoute: Authentication status", { isAuthenticated, isLoading });
+
+  // Show loading state while checking auth (graceful, doesn't block)
+  if (isLoading) {
+    console.log("ProtectedRoute: Still loading, showing loading state");
+    return <div>Loading...</div>;
+  }
 
   // If not authenticated, redirect to login
   // Using 'replace' prevents adding to history stack (avoids infinite redirects)
