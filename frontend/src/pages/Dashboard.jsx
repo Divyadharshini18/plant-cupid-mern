@@ -11,6 +11,8 @@ export default function Dashboard() {
   const [error, setError] = useState(null); // null = no error, string = error message
   const [plantCount, setPlantCount] = useState(null); // null = unknown, number when loaded
   const [isFetchingPlants, setIsFetchingPlants] = useState(false);
+  const [availablePlants, setAvailablePlants] = useState([]); // all plants from /api/plants
+  const [plantsUnavailableMessage, setPlantsUnavailableMessage] = useState(null);
   const [newPlantId, setNewPlantId] = useState("");
   const [newNickname, setNewNickname] = useState("");
   const [addMessage, setAddMessage] = useState(null); // success/info message for adds
@@ -89,6 +91,35 @@ export default function Dashboard() {
     fetchUserPlants();
   }, [token]);
 
+  // On mount, fetch list of available plants (public, no auth)
+  useEffect(() => {
+    const fetchAvailablePlants = async () => {
+      console.log("Dashboard: Fetching available plants");
+      setPlantsUnavailableMessage(null);
+
+      try {
+        const res = await api.get("/plants");
+        console.log("Dashboard: /api/plants success:", {
+          status: res.status,
+          count: Array.isArray(res.data) ? res.data.length : null,
+        });
+
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          setAvailablePlants(res.data);
+        } else {
+          setAvailablePlants([]);
+          setPlantsUnavailableMessage("Plants unavailable");
+        }
+      } catch (err) {
+        console.error("Dashboard: /api/plants error:", err);
+        setAvailablePlants([]);
+        setPlantsUnavailableMessage("Plants unavailable");
+      }
+    };
+
+    fetchAvailablePlants();
+  }, []);
+
   // Show loading state while checking auth (graceful, doesn't block)
   if (isLoading) {
     return (
@@ -122,7 +153,7 @@ export default function Dashboard() {
 
     // Basic validation
     if (!newPlantId) {
-      setError("Please provide a plant ID.");
+      setError("Please select a plant to add.");
       return;
     }
 
@@ -235,14 +266,24 @@ export default function Dashboard() {
             </div>
           )}
           <div style={{ marginBottom: "8px" }}>
-            <input
-              placeholder="Plant ID"
-              value={newPlantId}
-              onChange={(e) => {
-                setNewPlantId(e.target.value);
-                // Do not clear main error automatically here to keep feedback visible
-              }}
-            />
+            {plantsUnavailableMessage ? (
+              <p>{plantsUnavailableMessage}</p>
+            ) : (
+              <select
+                value={newPlantId}
+                onChange={(e) => {
+                  setNewPlantId(e.target.value);
+                  // Keep main error visible until user submits again
+                }}
+              >
+                <option value="">Select a plant</option>
+                {availablePlants.map((plant) => (
+                  <option key={plant._id} value={plant._id}>
+                    {plant.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
           <div style={{ marginBottom: "8px" }}>
             <input
@@ -253,7 +294,10 @@ export default function Dashboard() {
               }}
             />
           </div>
-          <button type="submit" disabled={isAddingPlant}>
+          <button
+            type="submit"
+            disabled={isAddingPlant || !newPlantId || !!plantsUnavailableMessage}
+          >
             {isAddingPlant ? "Adding..." : "Add Plant"}
           </button>
         </form>

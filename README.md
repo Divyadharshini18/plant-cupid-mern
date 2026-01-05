@@ -46,3 +46,13 @@ backend/
 ├── middleware/
 ├── config/
 └── server.js
+
+---
+
+## Authentication Flow
+
+1. User logs in
+2. Backend validates credentials and returns JWT
+3. Token stored in localStorage
+4. Routes check token before rendering
+5. AuthContext centralizes auth state
