@@ -50,6 +50,7 @@ const seedPlants = async () => {
     await connectDB();
 
     console.log("Seeding initial plants...");
+    console.log(`Using MONGO_URI: ${process.env.MONGO_URI ? "[SET]" : "[NOT SET - CHECK .env]"}`);
 
     // Fetch existing plants once and build a case-insensitive name set
     const existingPlants = await Plant.find(
@@ -61,6 +62,8 @@ const seedPlants = async () => {
       { name: 1 }
     );
 
+    console.log(`Found ${existingPlants.length} existing plants in database`);
+
     const existingNameSet = new Set(
       existingPlants.map((p) => p.name.toLowerCase())
     );
@@ -69,25 +72,47 @@ const seedPlants = async () => {
       (p) => !existingNameSet.has(p.name.toLowerCase())
     );
 
+    console.log(`Plants to insert: ${toInsert.length}`);
+
     if (toInsert.length === 0) {
       console.log("All sample plants already exist. Nothing to insert.");
     } else {
+      console.log(`Inserting ${toInsert.length} new plants...`);
       const inserted = await Plant.insertMany(toInsert);
       inserted.forEach((doc) => {
-        console.log(`Inserted plant: ${doc.name} (${doc._id})`);
+        console.log(`✓ Inserted plant: ${doc.name} (${doc._id})`);
       });
     }
 
     // Log skipped plants (case-insensitive)
     samplePlants.forEach((p) => {
       if (existingNameSet.has(p.name.toLowerCase())) {
-        console.log(`Skipped existing plant: ${p.name}`);
+        console.log(`⊘ Skipped existing plant: ${p.name}`);
       }
     });
 
-    console.log("Plant seeding completed.");
+    // VERIFICATION: Count total plants in database after seeding
+    const totalPlants = await Plant.find();
+    console.log(`\n=== SEEDING VERIFICATION ===`);
+    console.log(`Total plants in database: ${totalPlants.length}`);
+    console.log(`Expected plants: ${samplePlants.length}`);
+    
+    if (totalPlants.length >= samplePlants.length) {
+      console.log("✓ SUCCESS: Database has all expected plants");
+    } else {
+      console.warn(`⚠ WARNING: Database has ${totalPlants.length} plants, expected ${samplePlants.length}`);
+    }
+
+    // List all plant names for verification
+    console.log("\nAll plants in database:");
+    totalPlants.forEach((plant, index) => {
+      console.log(`  ${index + 1}. ${plant.name} (${plant._id})`);
+    });
+
+    console.log("\nPlant seeding completed.");
   } catch (err) {
     console.error("Error while seeding plants:", err.message);
+    console.error(err.stack);
   } finally {
     // Always close mongoose connection so script exits cleanly
     await mongoose.connection.close();
@@ -97,5 +122,3 @@ const seedPlants = async () => {
 };
 
 seedPlants();
-
-

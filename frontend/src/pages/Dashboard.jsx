@@ -99,12 +99,30 @@ export default function Dashboard() {
 
       try {
         const res = await api.get("/plants");
-        console.log("Dashboard: /api/plants success:", {
-          status: res.status,
-          count: Array.isArray(res.data) ? res.data.length : null,
+
+        // 1. Log FULL response details
+        const isArray = Array.isArray(res.data);
+        const length = isArray ? res.data.length : null;
+        console.log("Dashboard: /api/plants raw response", {
+          isArray,
+          length,
+          data: res.data,
+          json: (() => {
+            try {
+              return JSON.stringify(res.data);
+            } catch {
+              return "[unserializable]";
+            }
+          })(),
         });
 
-        if (Array.isArray(res.data) && res.data.length > 0) {
+        // 2. Log current availablePlants BEFORE updating
+        console.log(
+          "Dashboard: availablePlants BEFORE setAvailablePlants:",
+          availablePlants
+        );
+
+        if (isArray && length > 0) {
           setAvailablePlants(res.data);
         } else {
           setAvailablePlants([]);
@@ -119,6 +137,16 @@ export default function Dashboard() {
 
     fetchAvailablePlants();
   }, []);
+
+  // Temporary log to verify how many plants are in state
+  useEffect(() => {
+    console.log(
+      "Dashboard: availablePlants AFTER setAvailablePlants - length:",
+      availablePlants.length,
+      "items:",
+      availablePlants
+    );
+  }, [availablePlants]);
 
   // Show loading state while checking auth (graceful, doesn't block)
   if (isLoading) {
@@ -277,11 +305,23 @@ export default function Dashboard() {
                 }}
               >
                 <option value="">Select a plant</option>
-                {availablePlants.map((plant) => (
-                  <option key={plant._id} value={plant._id}>
-                    {plant.name}
-                  </option>
-                ))}
+                {availablePlants.map((plant, index) => {
+                  // Log each id to verify uniqueness and rendering
+                  console.log(
+                    "Dashboard: rendering plant option",
+                    plant._id,
+                    plant.name
+                  );
+
+                  // Use a composite key to avoid any potential key collisions
+                  const optionKey = plant._id || `${plant.name}-${index}`;
+
+                  return (
+                    <option key={optionKey} value={plant._id}>
+                      {plant.name}
+                    </option>
+                  );
+                })}
               </select>
             )}
           </div>
