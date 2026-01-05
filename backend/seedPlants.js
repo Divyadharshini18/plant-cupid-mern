@@ -5,7 +5,8 @@ const Plant = require("./models/Plant");
 
 dotenv.config();
 
-// Simple list of sample plants to seed
+// Target list of sample plants to seed
+// Names are important; we use them as a natural key (case-insensitive)
 const samplePlants = [
   {
     name: "Snake Plant",
@@ -15,18 +16,18 @@ const samplePlants = [
     tips: ["Allow soil to dry out completely between waterings"],
   },
   {
-    name: "Spider Plant",
-    waterFrequency: 7,
-    sunlight: "Bright, indirect light",
-    temperature: "13-27°C (55-80°F)",
-    tips: ["Keep soil slightly moist, but not soggy"],
+    name: "Rose",
+    waterFrequency: 3,
+    sunlight: "Full sun",
+    temperature: "15-26°C (60-80°F)",
+    tips: ["Plant in well-draining soil", "Deadhead spent blooms to encourage flowering"],
   },
   {
-    name: "Peace Lily",
+    name: "Tulip",
     waterFrequency: 5,
-    sunlight: "Low to medium indirect light",
-    temperature: "18-27°C (65-80°F)",
-    tips: ["Drooping leaves indicate it needs water", "Avoid direct sun"],
+    sunlight: "Full sun to partial shade",
+    temperature: "Cool to mild climates",
+    tips: ["Best grown from bulbs", "Allow foliage to die back naturally"],
   },
   {
     name: "Aloe Vera",
@@ -36,11 +37,11 @@ const samplePlants = [
     tips: ["Use well-draining soil", "Water deeply but infrequently"],
   },
   {
-    name: "Pothos",
+    name: "Money Plant",
     waterFrequency: 7,
     sunlight: "Low to bright indirect light",
     temperature: "18-27°C (65-80°F)",
-    tips: ["Trim vines to encourage bushier growth"],
+    tips: ["Avoid direct harsh sunlight", "Can be grown in water or soil"],
   },
 ];
 
@@ -50,16 +51,39 @@ const seedPlants = async () => {
 
     console.log("Seeding initial plants...");
 
-    for (const plantData of samplePlants) {
-      const existing = await Plant.findOne({ name: plantData.name });
-      if (existing) {
-        console.log(`Skipping existing plant: ${plantData.name}`);
-        continue;
-      }
+    // Fetch existing plants once and build a case-insensitive name set
+    const existingPlants = await Plant.find(
+      {
+        name: {
+          $in: samplePlants.map((p) => p.name),
+        },
+      },
+      { name: 1 }
+    );
 
-      const created = await Plant.create(plantData);
-      console.log(`Added plant: ${created.name} (${created._id})`);
+    const existingNameSet = new Set(
+      existingPlants.map((p) => p.name.toLowerCase())
+    );
+
+    const toInsert = samplePlants.filter(
+      (p) => !existingNameSet.has(p.name.toLowerCase())
+    );
+
+    if (toInsert.length === 0) {
+      console.log("All sample plants already exist. Nothing to insert.");
+    } else {
+      const inserted = await Plant.insertMany(toInsert);
+      inserted.forEach((doc) => {
+        console.log(`Inserted plant: ${doc.name} (${doc._id})`);
+      });
     }
+
+    // Log skipped plants (case-insensitive)
+    samplePlants.forEach((p) => {
+      if (existingNameSet.has(p.name.toLowerCase())) {
+        console.log(`Skipped existing plant: ${p.name}`);
+      }
+    });
 
     console.log("Plant seeding completed.");
   } catch (err) {
