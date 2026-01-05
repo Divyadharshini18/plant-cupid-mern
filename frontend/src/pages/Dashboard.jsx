@@ -11,67 +11,80 @@ export default function Dashboard() {
   const [error, setError] = useState(null); // null = no error, string = error message
   const [plantCount, setPlantCount] = useState(null); // null = unknown, number when loaded
   const [isFetchingPlants, setIsFetchingPlants] = useState(false);
+  const [newPlantId, setNewPlantId] = useState("");
+  const [newNickname, setNewNickname] = useState("");
+  const [addMessage, setAddMessage] = useState(null); // success/info message for adds
+  const [isAddingPlant, setIsAddingPlant] = useState(false);
+
+  // Helper to get a token from context or localStorage
+  const getStoredToken = () => {
+    return (
+      token ||
+      (typeof localStorage !== "undefined" ? localStorage.getItem("token") : null)
+    );
+  };
+
+  // Shared function to fetch user's plants (used on mount and after add)
+  const fetchUserPlants = async () => {
+    console.log("Dashboard: Fetching user plants");
+    setIsFetchingPlants(true);
+
+    try {
+      const storedToken = getStoredToken();
+
+      if (!storedToken) {
+        console.warn("Dashboard: No token found, skipping user plants fetch");
+        setError("Session expired. Please log in again.");
+        setIsFetchingPlants(false);
+        return;
+      }
+
+      const res = await api.get("/user-plants", {
+        headers: {
+          Authorization: `Bearer ${storedToken}`,
+        },
+      });
+
+      console.log("Dashboard: /api/user-plants success:", {
+        status: res.status,
+        count: Array.isArray(res.data) ? res.data.length : null,
+      });
+
+      if (Array.isArray(res.data)) {
+        setPlantCount(res.data.length);
+      } else {
+        setPlantCount(0);
+      }
+    } catch (err) {
+      // Handle errors gracefully without crashing the UI
+      if (err.response) {
+        const status = err.response.status;
+        console.error("Dashboard: /api/user-plants error response:", {
+          status,
+          data: err.response.data,
+        });
+
+        if (status === 401 || status === 403) {
+          setError("Session expired. Please log in again.");
+        } else {
+          setError("Unable to load your plants right now. Please try again later.");
+        }
+      } else if (err.request) {
+        console.error("Dashboard: /api/user-plants network error:", err.request);
+        setError(
+          "Network error while loading your plants. They will appear when the connection is restored."
+        );
+      } else {
+        console.error("Dashboard: /api/user-plants unexpected error:", err.message);
+        setError("An unexpected error occurred while loading your plants.");
+      }
+    } finally {
+      setIsFetchingPlants(false);
+    }
+  };
 
   // On mount, fetch protected user plants using JWT from localStorage
   useEffect(() => {
-    const fetchUserPlants = async () => {
-      console.log("Dashboard: Fetching user plants");
-      setIsFetchingPlants(true);
-
-      try {
-        // Prefer token from AuthContext, fall back to localStorage
-        const storedToken =
-          token || (typeof localStorage !== "undefined" ? localStorage.getItem("token") : null);
-
-        if (!storedToken) {
-          console.warn("Dashboard: No token found, skipping user plants fetch");
-          setError("Session expired. Please log in again.");
-          setIsFetchingPlants(false);
-          return;
-        }
-
-        const res = await api.get("/user-plants", {
-          headers: {
-            Authorization: `Bearer ${storedToken}`,
-          },
-        });
-
-        console.log("Dashboard: /api/user-plants success:", {
-          status: res.status,
-          count: Array.isArray(res.data) ? res.data.length : null,
-        });
-
-        if (Array.isArray(res.data)) {
-          setPlantCount(res.data.length);
-        } else {
-          setPlantCount(0);
-        }
-      } catch (err) {
-        // Handle errors gracefully without crashing the UI
-        if (err.response) {
-          const status = err.response.status;
-          console.error("Dashboard: /api/user-plants error response:", {
-            status,
-            data: err.response.data,
-          });
-
-          if (status === 401 || status === 403) {
-            setError("Session expired. Please log in again.");
-          } else {
-            setError("Unable to load your plants right now. Please try again later.");
-          }
-        } else if (err.request) {
-          console.error("Dashboard: /api/user-plants network error:", err.request);
-          setError("Network error while loading your plants. They will appear when the connection is restored.");
-        } else {
-          console.error("Dashboard: /api/user-plants unexpected error:", err.message);
-          setError("An unexpected error occurred while loading your plants.");
-        }
-      } finally {
-        setIsFetchingPlants(false);
-      }
-    };
-
     // Only attempt fetch once on mount
     fetchUserPlants();
   }, [token]);
@@ -97,6 +110,89 @@ export default function Dashboard() {
     }
   };
 
+  const handleAddPlant = async (e) => {
+    e.preventDefault();
+    console.log("Dashboard: Attempting to add plant", {
+      plantId: newPlantId,
+      nickname: newNickname,
+    });
+
+    // Reset messages
+    setAddMessage(null);
+
+    // Basic validation
+    if (!newPlantId) {
+      setError("Please provide a plant ID.");
+      return;
+    }
+
+    const storedToken = getStoredToken();
+    if (!storedToken) {
+      setError("Please login again to add plants.");
+      return;
+    }
+
+    setIsAddingPlant(true);
+
+    try {
+      const payload = { plantId: newPlantId };
+      if (newNickname.trim()) {
+        payload.nickname = newNickname.trim();
+      }
+
+      const res = await api.post("/user-plants", payload, {
+        headers: {
+          Authorization: `Bearer ${storedToken}`,
+        },
+      });
+
+      console.log("Dashboard: /api/user-plants POST success:", {
+        status: res.status,
+        data: res.data,
+      });
+
+      setError(null);
+      setAddMessage("Plant added successfully.");
+      // Clear form fields
+      setNewPlantId("");
+      setNewNickname("");
+
+      // Refresh plant list safely
+      fetchUserPlants();
+    } catch (err) {
+      // Handle write errors without crashing UI
+      let addErrorMessage = "Failed to add plant. Please try again.";
+
+      if (err.response) {
+        const status = err.response.status;
+        const errorData = err.response.data;
+        console.error("Dashboard: /api/user-plants POST error response:", {
+          status,
+          data: errorData,
+        });
+
+        if (status === 400) {
+          addErrorMessage =
+            errorData?.message || "Invalid plant data. Please check the ID and try again.";
+        } else if (status === 401 || status === 403) {
+          addErrorMessage = "Please login again to add plants.";
+        } else if (status >= 500) {
+          addErrorMessage = "Server error while adding plant. Please try again later.";
+        }
+      } else if (err.request) {
+        console.error("Dashboard: /api/user-plants POST network error:", err.request);
+        addErrorMessage =
+          "Network error while adding plant. The plant will be added when the connection is stable.";
+      } else {
+        console.error("Dashboard: /api/user-plants POST unexpected error:", err.message);
+      }
+
+      setError(addErrorMessage);
+    } finally {
+      setIsAddingPlant(false);
+    }
+  };
+
   return (
     <div>
       <h1>Dashboard</h1>
@@ -118,6 +214,49 @@ export default function Dashboard() {
       )}
       {isAuthenticated && plantCount === null && isFetchingPlants && (
         <p>Loading your plants...</p>
+      )}
+
+      {/* Minimal form to add a plant safely */}
+      {isAuthenticated && (
+        <form onSubmit={handleAddPlant} style={{ marginTop: "20px", marginBottom: "20px" }}>
+          <h3>Add a Plant</h3>
+          {addMessage && (
+            <div
+              style={{
+                padding: "8px",
+                marginBottom: "8px",
+                backgroundColor: "#eef",
+                border: "1px solid #ccf",
+                borderRadius: "4px",
+                color: "#336",
+              }}
+            >
+              {addMessage}
+            </div>
+          )}
+          <div style={{ marginBottom: "8px" }}>
+            <input
+              placeholder="Plant ID"
+              value={newPlantId}
+              onChange={(e) => {
+                setNewPlantId(e.target.value);
+                // Do not clear main error automatically here to keep feedback visible
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: "8px" }}>
+            <input
+              placeholder="Nickname (optional)"
+              value={newNickname}
+              onChange={(e) => {
+                setNewNickname(e.target.value);
+              }}
+            />
+          </div>
+          <button type="submit" disabled={isAddingPlant}>
+            {isAddingPlant ? "Adding..." : "Add Plant"}
+          </button>
+        </form>
       )}
 
       {isAuthenticated && user ? (
