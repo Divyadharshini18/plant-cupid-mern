@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 
 export default function Register() {
   console.log("Register: Rendering");
-  
+
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,6 +15,7 @@ export default function Register() {
 
   const handleRegister = async () => {
     console.log("Register: Attempting registration");
+    // Clear any previous errors and success messages at the start
     setError(null);
     setSuccess(false);
     setIsLoading(true);
@@ -31,13 +34,28 @@ export default function Register() {
     }
     
     try {
+      console.log("Register: Sending POST request to /users/register", {
+        url: "/users/register",
+        data: { name, email, password: "[REDACTED]" }
+      });
       const res = await api.post("/users/register", { name, email, password });
-      console.log("REGISTER SUCCESS:", res.data);
+      console.log("REGISTER SUCCESS:", {
+        status: res.status,
+        data: res.data
+      });
+      
+      // Clear error on successful registration
+      setError(null);
       setSuccess(true);
+      
       // Clear form
       setName("");
       setEmail("");
       setPassword("");
+
+      // After successful registration, navigate to login
+      console.log("Register: Redirecting to /login after successful registration");
+      navigate("/login");
     } catch (err) {
       // Handle different error types with user-friendly messages
       let errorMessage = "Registration failed. Please try again.";
@@ -69,6 +87,8 @@ export default function Register() {
         errorMessage = "An unexpected error occurred. Please try again.";
       }
       
+      // Clear success message if there's an error
+      setSuccess(false);
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -105,18 +125,30 @@ export default function Register() {
       <input 
         placeholder="Name"
         value={name} 
-        onChange={(e) => setName(e.target.value)} 
+        onChange={(e) => {
+          setName(e.target.value);
+          // Clear error when user starts typing
+          if (error) setError(null);
+        }} 
       />
       <input 
         placeholder="Email"
         value={email} 
-        onChange={(e) => setEmail(e.target.value)} 
+        onChange={(e) => {
+          setEmail(e.target.value);
+          // Clear error when user starts typing
+          if (error) setError(null);
+        }} 
       />
       <input
         type="password"
         placeholder="Password"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          // Clear error when user starts typing
+          if (error) setError(null);
+        }}
       />
       <button onClick={handleRegister} disabled={isLoading}>
         {isLoading ? "Registering..." : "Register"}

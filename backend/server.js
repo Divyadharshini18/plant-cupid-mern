@@ -1,12 +1,22 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
+const cors = require("cors");
 
 dotenv.config();
 connectDB();
 
 const app = express();
+
+// CORS configuration - must be after app is created
+app.use(cors());
 app.use(express.json());
+
+// Log all incoming requests for debugging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
 
 app.get("/", (req, res) => {
   res.send("Plant Cupid backend is running 🌱");

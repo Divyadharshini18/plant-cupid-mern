@@ -15,7 +15,8 @@ export default function Login() {
 
   const handleLogin = async () => {
     console.log("Login: Attempting login with email:", email);
-    setError(null); // Clear previous errors
+    // Clear any previous errors at the start
+    setError(null);
     setIsLoading(true);
     
     // Validate inputs
@@ -52,6 +53,9 @@ export default function Login() {
       // Use AuthContext to store user and token (handles localStorage automatically)
       login(userData, res.data.token);
       
+      // Clear error on successful login before redirect
+      setError(null);
+      
       // Redirect to dashboard
       console.log("Login: Redirecting to /dashboard");
       navigate("/dashboard");
@@ -77,7 +81,7 @@ export default function Login() {
         } else if (status >= 500) {
           errorMessage = "Server error. Please try again in a few moments.";
         } else {
-          errorMessage = errorData?.message || `Login failed. Please try again.`;
+          errorMessage = errorData?.message || "Login failed. Please try again.";
         }
       } else if (err.request) {
         // Request made but no response (network error)
@@ -113,13 +117,21 @@ export default function Login() {
       <input 
         placeholder="Email"
         value={email} 
-        onChange={(e) => setEmail(e.target.value)} 
+        onChange={(e) => {
+          setEmail(e.target.value);
+          // Clear error when user starts typing
+          if (error) setError(null);
+        }} 
       />
       <input
         type="password"
         placeholder="Password"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          // Clear error when user starts typing
+          if (error) setError(null);
+        }}
       />
       <button onClick={handleLogin} disabled={isLoading}>
         {isLoading ? "Logging in..." : "Login"}
