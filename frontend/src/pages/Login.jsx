@@ -10,17 +10,18 @@ export default function Login() {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null); // null = no error, string = error message
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
     console.log("Login: Attempting login with email:", email);
-    setError(""); // Clear previous errors
+    setError(null); // Clear previous errors
+    setIsLoading(true);
     
     // Validate inputs
     if (!email || !password) {
-      const errorMsg = "Please enter both email and password";
-      console.error("Login: Validation failed -", errorMsg);
-      setError(errorMsg);
+      setError("Please enter both email and password");
+      setIsLoading(false);
       return;
     }
     
@@ -37,6 +38,7 @@ export default function Login() {
       if (!res.data.token) {
         console.error("Login: No token in response", res.data);
         setError("Login successful but no token received. Please try again.");
+        setIsLoading(false);
         return;
       }
       
@@ -54,7 +56,9 @@ export default function Login() {
       console.log("Login: Redirecting to /dashboard");
       navigate("/dashboard");
     } catch (err) {
-      // Handle different error types
+      // Handle different error types with user-friendly messages
+      let errorMessage = "Something went wrong. Please try again.";
+      
       if (err.response) {
         // Server responded with error status
         const status = err.response.status;
@@ -64,23 +68,48 @@ export default function Login() {
           message: errorData?.message,
           data: errorData
         });
-        setError(errorData?.message || `Login failed (${status}). Please try again.`);
+        
+        // User-friendly messages based on status
+        if (status === 401) {
+          errorMessage = "Invalid email or password. Please check your credentials and try again.";
+        } else if (status === 400) {
+          errorMessage = errorData?.message || "Invalid request. Please check your input.";
+        } else if (status >= 500) {
+          errorMessage = "Server error. Please try again in a few moments.";
+        } else {
+          errorMessage = errorData?.message || `Login failed. Please try again.`;
+        }
       } else if (err.request) {
         // Request made but no response (network error)
         console.error("LOGIN FAILED: No response from server", err.request);
-        setError("Cannot connect to server. Please check your connection.");
+        errorMessage = "Cannot connect to the server. Please check your internet connection and try again.";
       } else {
         // Other error
         console.error("LOGIN FAILED: Unexpected error", err.message);
-        setError("An unexpected error occurred. Please try again.");
+        errorMessage = "An unexpected error occurred. Please try again.";
       }
+      
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div>
       <h2>Login</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && (
+        <div style={{ 
+          padding: "10px", 
+          marginBottom: "10px", 
+          backgroundColor: "#fee", 
+          border: "1px solid #fcc",
+          borderRadius: "4px",
+          color: "#c33"
+        }}>
+          {error}
+        </div>
+      )}
       <input 
         placeholder="Email"
         value={email} 
@@ -92,7 +121,9 @@ export default function Login() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={handleLogin}>Login</button>
+      <button onClick={handleLogin} disabled={isLoading}>
+        {isLoading ? "Logging in..." : "Login"}
+      </button>
     </div>
   );
 }
