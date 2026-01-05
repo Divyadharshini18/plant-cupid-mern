@@ -15,7 +15,19 @@ exports.addUserPlant = async (req, res) => {
   }
 
   try {
-    // 2️⃣ Create user-plant relation
+    // 2️⃣ Check if user-plant relation already exists
+    const existing = await UserPlant.findOne({
+      user: req.user,
+      plant: plantId,
+    });
+
+    if (existing) {
+      return res.status(409).json({
+        message: "Plant already added to your collection",
+      });
+    }
+
+    // 3️⃣ Create user-plant relation (only if not existing)
     const userPlant = await UserPlant.create({
       user: req.user,
       plant: plantId,
@@ -24,14 +36,14 @@ exports.addUserPlant = async (req, res) => {
 
     res.status(201).json(userPlant);
   } catch (error) {
-    // 3️⃣ Handle duplicate entry
+    // 4️⃣ Handle duplicate entry (fallback for race conditions)
     if (error.code === 11000) {
-      return res
-        .status(400)
-        .json({ message: "Plant already added to your collection" });
+      return res.status(409).json({
+        message: "Plant already added to your collection",
+      });
     }
 
-    // 4️⃣ Fallback error
+    // 5️⃣ Fallback error
     res.status(500).json({ message: error.message });
   }
 };
