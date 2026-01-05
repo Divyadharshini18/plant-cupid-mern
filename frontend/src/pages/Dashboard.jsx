@@ -185,6 +185,12 @@ export default function Dashboard() {
       return;
     }
 
+    // Validate nickname is required
+    if (!newNickname || !newNickname.trim()) {
+      setError("Please give your plant a nickname");
+      return;
+    }
+
     const storedToken = getStoredToken();
     if (!storedToken) {
       setError("Please login again to add plants.");
@@ -194,10 +200,10 @@ export default function Dashboard() {
     setIsAddingPlant(true);
 
     try {
-      const payload = { plantId: newPlantId };
-      if (newNickname.trim()) {
-        payload.nickname = newNickname.trim();
-      }
+      const payload = {
+        plantId: newPlantId,
+        nickname: newNickname.trim(),
+      };
 
       const res = await api.post("/user-plants", payload, {
         headers: {
@@ -327,16 +333,25 @@ export default function Dashboard() {
           </div>
           <div style={{ marginBottom: "8px" }}>
             <input
-              placeholder="Nickname (optional)"
+              placeholder="Nickname (required)"
               value={newNickname}
               onChange={(e) => {
                 setNewNickname(e.target.value);
+                // Clear error when user starts typing
+                if (error) setError(null);
               }}
+              required
             />
           </div>
           <button
             type="submit"
-            disabled={isAddingPlant || !newPlantId || !!plantsUnavailableMessage}
+            disabled={
+              isAddingPlant ||
+              !newPlantId ||
+              !newNickname ||
+              !newNickname.trim() ||
+              !!plantsUnavailableMessage
+            }
           >
             {isAddingPlant ? "Adding..." : "Add Plant"}
           </button>

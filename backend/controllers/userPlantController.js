@@ -10,40 +10,51 @@ exports.addUserPlant = async (req, res) => {
     return res.status(400).json({ message: "Invalid plant ID" });
   }
 
-  if (nickname && nickname.length > 50) {
+  // 2️⃣ Validate nickname is REQUIRED (trim + validate)
+  if (!nickname || typeof nickname !== "string") {
+    return res.status(400).json({ message: "Nickname is required" });
+  }
+
+  const trimmedNickname = nickname.trim();
+
+  if (trimmedNickname === "") {
+    return res.status(400).json({ message: "Nickname cannot be empty" });
+  }
+
+  if (trimmedNickname.length > 50) {
     return res.status(400).json({ message: "Nickname too long" });
   }
 
   try {
-    // 2️⃣ Check if user-plant relation already exists
+    // 3️⃣ Check if user already has a plant with this nickname (case-insensitive)
     const existing = await UserPlant.findOne({
       user: req.user,
-      plant: plantId,
+      nickname: { $regex: new RegExp(`^${trimmedNickname}$`, "i") },
     });
 
     if (existing) {
       return res.status(409).json({
-        message: "Plant already added to your collection",
+        message: "You already have a plant with this nickname",
       });
     }
 
-    // 3️⃣ Create user-plant relation (only if not existing)
+    // 4️⃣ Create user-plant relation (same plantId allowed if nickname is different)
     const userPlant = await UserPlant.create({
       user: req.user,
       plant: plantId,
-      nickname,
+      nickname: trimmedNickname,
     });
 
     res.status(201).json(userPlant);
   } catch (error) {
-    // 4️⃣ Handle duplicate entry (fallback for race conditions)
+    // 5️⃣ Handle duplicate entry (fallback for race conditions)
     if (error.code === 11000) {
       return res.status(409).json({
-        message: "Plant already added to your collection",
+        message: "You already have a plant with this nickname",
       });
     }
 
-    // 5️⃣ Fallback error
+    // 6️⃣ Fallback error
     res.status(500).json({ message: error.message });
   }
 };
