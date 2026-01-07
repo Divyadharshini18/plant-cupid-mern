@@ -236,9 +236,19 @@ export default function Dashboard() {
           data: errorData,
         });
 
-        if (status === 400) {
+        // Prefer backend message when available
+        const backendMessage = errorData?.message;
+
+        if (backendMessage) {
+          // For nickname duplicate (409) we append extra guidance text
+          if (status === 409) {
+            addErrorMessage = `${backendMessage} Try a different nickname.`;
+          } else {
+            addErrorMessage = backendMessage;
+          }
+        } else if (status === 400) {
           addErrorMessage =
-            errorData?.message || "Invalid plant data. Please check the ID and try again.";
+            "Invalid plant data. Please check the ID and nickname and try again.";
         } else if (status === 401 || status === 403) {
           addErrorMessage = "Please login again to add plants.";
         } else if (status >= 500) {
