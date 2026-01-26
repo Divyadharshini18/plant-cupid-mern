@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -136,6 +136,7 @@ export default function Login() {
       <button onClick={handleLogin} disabled={isLoading}>
         {isLoading ? "Logging in..." : "Login"}
       </button>
+      <p>Don't have an account? <Link to="/register">Register</Link></p>
     </div>
   );
 }
