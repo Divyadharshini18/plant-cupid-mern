@@ -2,141 +2,93 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
+import "../index.css"
 
 export default function Login() {
-  console.log("Login: Rendering");
-  
   const navigate = useNavigate();
   const { login } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null); // null = no error, string = error message
+  const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    console.log("Login: Attempting login with email:", email);
-    // Clear any previous errors at the start
     setError(null);
     setIsLoading(true);
-    
-    // Validate inputs
+
     if (!email || !password) {
       setError("Please enter both email and password");
       setIsLoading(false);
       return;
     }
-    
+
     try {
-      console.log("Login: Sending POST request to /auth/login");
       const res = await api.post("/auth/login", { email, password });
-      console.log("LOGIN SUCCESS:", {
-        status: res.status,
-        hasToken: !!res.data.token,
-        userEmail: res.data.email
-      });
-      
-      // Verify token exists in response
+
       if (!res.data.token) {
-        console.error("Login: No token in response", res.data);
-        setError("Login successful but no token received. Please try again.");
-        setIsLoading(false);
+        setError("Login successful but no token received");
         return;
       }
-      
-      // Extract user data from response (backend returns: _id, name, email, token)
+
       const userData = {
         _id: res.data._id,
         name: res.data.name,
-        email: res.data.email
+        email: res.data.email,
       };
-      
-      // Use AuthContext to store user and token (handles localStorage automatically)
+
       login(userData, res.data.token);
-      
-      // Clear error on successful login before redirect
-      setError(null);
-      
-      // Redirect to dashboard
-      console.log("Login: Redirecting to /dashboard");
       navigate("/dashboard");
     } catch (err) {
-      // Handle different error types with user-friendly messages
-      let errorMessage = "Something went wrong. Please try again.";
-      
-      if (err.response) {
-        // Server responded with error status
-        const status = err.response.status;
-        const errorData = err.response.data;
-        console.error("LOGIN FAILED:", {
-          status,
-          message: errorData?.message,
-          data: errorData
-        });
-        
-        // User-friendly messages based on status
-        if (status === 401) {
-          errorMessage = "Invalid email or password. Please check your credentials and try again.";
-        } else if (status === 400) {
-          errorMessage = errorData?.message || "Invalid request. Please check your input.";
-        } else if (status >= 500) {
-          errorMessage = "Server error. Please try again in a few moments.";
-        } else {
-          errorMessage = errorData?.message || "Login failed. Please try again.";
-        }
+      if (err.response?.status === 401) {
+        setError("Invalid email or password");
+      } else if (err.response?.status >= 500) {
+        setError("Server error. Try again later.");
       } else if (err.request) {
-        // Request made but no response (network error)
-        console.error("LOGIN FAILED: No response from server", err.request);
-        errorMessage = "Cannot connect to the server. Please check your internet connection and try again.";
+        setError("Cannot connect to server");
       } else {
-        // Other error
-        console.error("LOGIN FAILED: Unexpected error", err.message);
-        errorMessage = "An unexpected error occurred. Please try again.";
+        setError("Something went wrong");
       }
-      
-      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      {error && (
-        <div style={{ 
-          padding: "10px", 
-          marginBottom: "10px", 
-          backgroundColor: "#fee", 
-          border: "1px solid #fcc",
-          borderRadius: "4px",
-          color: "#c33"
-        }}>
-          {error}
-        </div>
-      )}
-      <input 
-        placeholder="Email"
-        value={email} 
-        onChange={(e) => {
-          setEmail(e.target.value);
-          // Clear error when user starts typing
-          if (error) setError(null);
-        }} 
-      />
+    <div className="login-container">
+      <h2 className="login-title">Welcome Back 🌱</h2>
+
+      {error && <p className="login-error">{error}</p>}
+
       <input
+        className="login-input"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <input
+        className="login-input"
         type="password"
         placeholder="Password"
         value={password}
-        onChange={(e) => {
-          setPassword(e.target.value);
-          // Clear error when user starts typing
-          if (error) setError(null);
-        }}
+        onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={handleLogin} disabled={isLoading}>
+
+      <button
+        className="login-button"
+        onClick={handleLogin}
+        disabled={isLoading}
+      >
         {isLoading ? "Logging in..." : "Login"}
       </button>
-      <p>Don't have an account? <Link to="/register">Register</Link></p>
+
+      <p className="login-footer">
+        Don't have an account?{" "}
+        <Link className="login-link" to="/register">
+          Register
+        </Link>
+      </p>
     </div>
   );
 }
