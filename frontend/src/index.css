@@ -145,3 +145,52 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Dashboard */
+
+.dashboard-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 30px;
+}
+
+.dashboard-title {
+  color: #2f855a;
+  margin-bottom: 10px;
+}
+
+.dashboard-info {
+  margin-bottom: 20px;
+  color: #22543d;
+}
+
+.dashboard-form {
+  background: #f6fff8;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard-user {
+  background: #fff5f7;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.dashboard-logout {
+  margin-top: 10px;
+  background: #f687b3;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.dashboard-loading {
+  text-align: center;
+  margin-top: 80px;
+}
