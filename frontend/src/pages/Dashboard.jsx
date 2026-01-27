@@ -4,364 +4,161 @@ import { useAuth } from "../context/AuthContext";
 import api from "../api/api";
 
 export default function Dashboard() {
-  console.log("Dashboard: Rendering");
-  
   const navigate = useNavigate();
   const { user, token, isAuthenticated, isLoading, logout } = useAuth();
-  const [error, setError] = useState(null); // null = no error, string = error message
-  const [plantCount, setPlantCount] = useState(null); // null = unknown, number when loaded
+
+  const [error, setError] = useState(null);
+  const [plantCount, setPlantCount] = useState(null);
   const [isFetchingPlants, setIsFetchingPlants] = useState(false);
-  const [availablePlants, setAvailablePlants] = useState([]); // all plants from /api/plants
+  const [availablePlants, setAvailablePlants] = useState([]);
   const [plantsUnavailableMessage, setPlantsUnavailableMessage] = useState(null);
   const [newPlantId, setNewPlantId] = useState("");
   const [newNickname, setNewNickname] = useState("");
-  const [addMessage, setAddMessage] = useState(null); // success/info message for adds
+  const [addMessage, setAddMessage] = useState(null);
   const [isAddingPlant, setIsAddingPlant] = useState(false);
 
-  // Helper to get a token from context or localStorage
-  const getStoredToken = () => {
-    return (
-      token ||
-      (typeof localStorage !== "undefined" ? localStorage.getItem("token") : null)
-    );
-  };
+  const getStoredToken = () =>
+    token || localStorage.getItem("token");
 
-  // Shared function to fetch user's plants (used on mount and after add)
   const fetchUserPlants = async () => {
-    console.log("Dashboard: Fetching user plants");
     setIsFetchingPlants(true);
-
     try {
       const storedToken = getStoredToken();
-
       if (!storedToken) {
-        console.warn("Dashboard: No token found, skipping user plants fetch");
         setError("Session expired. Please log in again.");
-        setIsFetchingPlants(false);
         return;
       }
 
       const res = await api.get("/user-plants", {
-        headers: {
-          Authorization: `Bearer ${storedToken}`,
-        },
+        headers: { Authorization: `Bearer ${storedToken}` },
       });
 
-      console.log("Dashboard: /api/user-plants success:", {
-        status: res.status,
-        count: Array.isArray(res.data) ? res.data.length : null,
-      });
-
-      if (Array.isArray(res.data)) {
-        setPlantCount(res.data.length);
-      } else {
-        setPlantCount(0);
-      }
+      setPlantCount(Array.isArray(res.data) ? res.data.length : 0);
     } catch (err) {
-      // Handle errors gracefully without crashing the UI
-      if (err.response) {
-        const status = err.response.status;
-        console.error("Dashboard: /api/user-plants error response:", {
-          status,
-          data: err.response.data,
-        });
-
-        if (status === 401 || status === 403) {
-          setError("Session expired. Please log in again.");
-        } else {
-          setError("Unable to load your plants right now. Please try again later.");
-        }
-      } else if (err.request) {
-        console.error("Dashboard: /api/user-plants network error:", err.request);
-        setError(
-          "Network error while loading your plants. They will appear when the connection is restored."
-        );
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError("Session expired. Please log in again.");
       } else {
-        console.error("Dashboard: /api/user-plants unexpected error:", err.message);
-        setError("An unexpected error occurred while loading your plants.");
+        setError("Unable to load your plants.");
       }
     } finally {
       setIsFetchingPlants(false);
     }
   };
 
-  // On mount, fetch protected user plants using JWT from localStorage
   useEffect(() => {
-    // Only attempt fetch once on mount
     fetchUserPlants();
   }, [token]);
 
-  // On mount, fetch list of available plants (public, no auth)
   useEffect(() => {
     const fetchAvailablePlants = async () => {
-      console.log("Dashboard: Fetching available plants");
-      setPlantsUnavailableMessage(null);
-
       try {
         const res = await api.get("/plants");
-
-        // 1. Log FULL response details
-        const isArray = Array.isArray(res.data);
-        const length = isArray ? res.data.length : null;
-        console.log("Dashboard: /api/plants raw response", {
-          isArray,
-          length,
-          data: res.data,
-          json: (() => {
-            try {
-              return JSON.stringify(res.data);
-            } catch {
-              return "[unserializable]";
-            }
-          })(),
-        });
-
-        // 2. Log current availablePlants BEFORE updating
-        console.log(
-          "Dashboard: availablePlants BEFORE setAvailablePlants:",
-          availablePlants
-        );
-
-        if (isArray && length > 0) {
+        if (Array.isArray(res.data) && res.data.length > 0) {
           setAvailablePlants(res.data);
         } else {
           setAvailablePlants([]);
           setPlantsUnavailableMessage("Plants unavailable");
         }
-      } catch (err) {
-        console.error("Dashboard: /api/plants error:", err);
+      } catch {
         setAvailablePlants([]);
         setPlantsUnavailableMessage("Plants unavailable");
       }
     };
-
     fetchAvailablePlants();
   }, []);
 
-  // Temporary log to verify how many plants are in state
-  useEffect(() => {
-    console.log(
-      "Dashboard: availablePlants AFTER setAvailablePlants - length:",
-      availablePlants.length,
-      "items:",
-      availablePlants
-    );
-  }, [availablePlants]);
-
-  // Show loading state while checking auth (graceful, doesn't block)
-  if (isLoading) {
-    return (
-      <div>
-        <h1>Dashboard</h1>
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
   const handleLogout = () => {
-    console.log("Dashboard: Logging out");
-    try {
-      logout();
-      navigate("/login");
-    } catch (err) {
-      console.error("Dashboard: Logout error", err);
-      setError("Failed to log out. Please try again.");
-    }
+    logout();
+    navigate("/login");
   };
 
   const handleAddPlant = async (e) => {
     e.preventDefault();
-    console.log("Dashboard: Attempting to add plant", {
-      plantId: newPlantId,
-      nickname: newNickname,
-    });
-
-    // Reset messages
     setAddMessage(null);
 
-    // Basic validation
-    if (!newPlantId) {
-      setError("Please select a plant to add.");
-      return;
-    }
-
-    // Validate nickname is required
-    if (!newNickname || !newNickname.trim()) {
-      setError("Please give your plant a nickname");
-      return;
-    }
+    if (!newPlantId) return setError("Please select a plant.");
+    if (!newNickname.trim()) return setError("Please give your plant a nickname.");
 
     const storedToken = getStoredToken();
-    if (!storedToken) {
-      setError("Please login again to add plants.");
-      return;
-    }
+    if (!storedToken) return setError("Please login again.");
 
     setIsAddingPlant(true);
 
     try {
-      const payload = {
-        plantId: newPlantId,
-        nickname: newNickname.trim(),
-      };
+      await api.post(
+        "/user-plants",
+        { plantId: newPlantId, nickname: newNickname.trim() },
+        { headers: { Authorization: `Bearer ${storedToken}` } }
+      );
 
-      const res = await api.post("/user-plants", payload, {
-        headers: {
-          Authorization: `Bearer ${storedToken}`,
-        },
-      });
-
-      console.log("Dashboard: /api/user-plants POST success:", {
-        status: res.status,
-        data: res.data,
-      });
-
-      setError(null);
       setAddMessage("Plant added successfully.");
-      // Clear form fields
       setNewPlantId("");
       setNewNickname("");
-
-      // Refresh plant list safely
+      setError(null);
       fetchUserPlants();
     } catch (err) {
-      // Handle write errors without crashing UI
-      let addErrorMessage = "Failed to add plant. Please try again.";
-
-      if (err.response) {
-        const status = err.response.status;
-        const errorData = err.response.data;
-        console.error("Dashboard: /api/user-plants POST error response:", {
-          status,
-          data: errorData,
-        });
-
-        // Prefer backend message when available
-        const backendMessage = errorData?.message;
-
-        if (backendMessage) {
-          // For nickname duplicate (409) we append extra guidance text
-          if (status === 409) {
-            addErrorMessage = `${backendMessage} Try a different nickname.`;
-          } else {
-            addErrorMessage = backendMessage;
-          }
-        } else if (status === 400) {
-          addErrorMessage =
-            "Invalid plant data. Please check the ID and nickname and try again.";
-        } else if (status === 401 || status === 403) {
-          addErrorMessage = "Please login again to add plants.";
-        } else if (status >= 500) {
-          addErrorMessage = "Server error while adding plant. Please try again later.";
-        }
-      } else if (err.request) {
-        console.error("Dashboard: /api/user-plants POST network error:", err.request);
-        addErrorMessage =
-          "Network error while adding plant. The plant will be added when the connection is stable.";
+      if (err.response?.status === 409) {
+        setError("Nickname already exists. Try a different one.");
       } else {
-        console.error("Dashboard: /api/user-plants POST unexpected error:", err.message);
+        setError("Failed to add plant.");
       }
-
-      setError(addErrorMessage);
     } finally {
       setIsAddingPlant(false);
     }
   };
 
+  if (isLoading) {
+    return <p className="dashboard-loading">Loading...</p>;
+  }
+
   return (
-    <div>
-      <h1>Dashboard</h1>
-      {error && (
-        <div style={{ 
-          padding: "10px", 
-          marginBottom: "10px", 
-          backgroundColor: "#fee", 
-          border: "1px solid #fcc",
-          borderRadius: "4px",
-          color: "#c33"
-        }}>
-          {error}
-        </div>
-      )}
-      {/* Show simple info about protected data fetch */}
+    <div className="dashboard-container">
+      <h1 className="dashboard-title">Dashboard 🌱</h1>
+
+      {error && <p className="auth-error">{error}</p>}
+      {addMessage && <p className="auth-success">{addMessage}</p>}
+
       {isAuthenticated && plantCount !== null && (
-        <p>Your plants in collection: {plantCount}</p>
-      )}
-      {isAuthenticated && plantCount === null && isFetchingPlants && (
-        <p>Loading your plants...</p>
+        <p className="dashboard-info">
+          Your plants in collection: <strong>{plantCount}</strong>
+        </p>
       )}
 
-      {/* Minimal form to add a plant safely */}
       {isAuthenticated && (
-        <form onSubmit={handleAddPlant} style={{ marginTop: "20px", marginBottom: "20px" }}>
+        <form className="dashboard-form" onSubmit={handleAddPlant}>
           <h3>Add a Plant</h3>
-          {addMessage && (
-            <div
-              style={{
-                padding: "8px",
-                marginBottom: "8px",
-                backgroundColor: "#eef",
-                border: "1px solid #ccf",
-                borderRadius: "4px",
-                color: "#336",
-              }}
+
+          {plantsUnavailableMessage ? (
+            <p>{plantsUnavailableMessage}</p>
+          ) : (
+            <select
+              className="auth-input"
+              value={newPlantId}
+              onChange={(e) => setNewPlantId(e.target.value)}
             >
-              {addMessage}
-            </div>
+              <option value="">Select a plant</option>
+              {availablePlants.map((plant) => (
+                <option key={plant._id} value={plant._id}>
+                  {plant.name}
+                </option>
+              ))}
+            </select>
           )}
-          <div style={{ marginBottom: "8px" }}>
-            {plantsUnavailableMessage ? (
-              <p>{plantsUnavailableMessage}</p>
-            ) : (
-              <select
-                value={newPlantId}
-                onChange={(e) => {
-                  setNewPlantId(e.target.value);
-                  // Keep main error visible until user submits again
-                }}
-              >
-                <option value="">Select a plant</option>
-                {availablePlants.map((plant, index) => {
-                  // Log each id to verify uniqueness and rendering
-                  console.log(
-                    "Dashboard: rendering plant option",
-                    plant._id,
-                    plant.name
-                  );
 
-                  // Use a composite key to avoid any potential key collisions
-                  const optionKey = plant._id || `${plant.name}-${index}`;
+          <input
+            className="auth-input"
+            placeholder="Nickname"
+            value={newNickname}
+            onChange={(e) => {
+              setNewNickname(e.target.value);
+              if (error) setError(null);
+            }}
+          />
 
-                  return (
-                    <option key={optionKey} value={plant._id}>
-                      {plant.name}
-                    </option>
-                  );
-                })}
-              </select>
-            )}
-          </div>
-          <div style={{ marginBottom: "8px" }}>
-            <input
-              placeholder="Nickname (required)"
-              value={newNickname}
-              onChange={(e) => {
-                setNewNickname(e.target.value);
-                // Clear error when user starts typing
-                if (error) setError(null);
-              }}
-              required
-            />
-          </div>
           <button
+            className="auth-button"
             type="submit"
-            disabled={
-              isAddingPlant ||
-              !newPlantId ||
-              !newNickname ||
-              !newNickname.trim() ||
-              !!plantsUnavailableMessage
-            }
+            disabled={isAddingPlant || !newPlantId || !newNickname.trim()}
           >
             {isAddingPlant ? "Adding..." : "Add Plant"}
           </button>
@@ -369,17 +166,15 @@ export default function Dashboard() {
       )}
 
       {isAuthenticated && user ? (
-        <div>
-          <p>Welcome, {user.name || user.email}!</p>
+        <div className="dashboard-user">
+          <p>Welcome, {user.name || user.email}</p>
           <p>Email: {user.email}</p>
-          <p>Status: Logged in</p>
-          <button onClick={handleLogout}>Logout</button>
+          <button className="dashboard-logout" onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       ) : (
-        <div>
-          <p>Status: Guest</p>
-          <p>Please log in to access your dashboard.</p>
-        </div>
+        <p>Please log in to access your dashboard.</p>
       )}
     </div>
   );
