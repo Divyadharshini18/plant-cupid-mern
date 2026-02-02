@@ -2,22 +2,21 @@ const UserPlant = require("../models/UserPlant");
 const Plant = require("../models/Plant");
 const mongoose = require("mongoose");
 
+/* -------------------- ADD USER PLANT -------------------- */
 exports.addUserPlant = async (req, res) => {
   const { plantId, nickname } = req.body;
 
-  // 1️⃣ Validate input BEFORE DB call
   if (!mongoose.Types.ObjectId.isValid(plantId)) {
     return res.status(400).json({ message: "Invalid plant ID" });
   }
 
-  // 2️⃣ Validate nickname is REQUIRED (trim + validate)
   if (!nickname || typeof nickname !== "string") {
     return res.status(400).json({ message: "Nickname is required" });
   }
 
   const trimmedNickname = nickname.trim();
 
-  if (trimmedNickname === "") {
+  if (!trimmedNickname) {
     return res.status(400).json({ message: "Nickname cannot be empty" });
   }
 
@@ -26,19 +25,17 @@ exports.addUserPlant = async (req, res) => {
   }
 
   try {
-    // 3️⃣ Check if user already has a plant with this nickname (case-insensitive)
-    const existing = await UserPlant.findOne({
+    const exists = await UserPlant.findOne({
       user: req.user,
       nickname: { $regex: new RegExp(`^${trimmedNickname}$`, "i") },
     });
 
-    if (existing) {
-      return res.status(409).json({
-        message: "You already have a plant with this nickname",
-      });
+    if (exists) {
+      return res
+        .status(409)
+        .json({ message: "You already have a plant with this nickname" });
     }
 
-    // 4️⃣ Create user-plant relation (same plantId allowed if nickname is different)
     const userPlant = await UserPlant.create({
       user: req.user,
       plant: plantId,
@@ -46,37 +43,33 @@ exports.addUserPlant = async (req, res) => {
     });
 
     res.status(201).json(userPlant);
-  } catch (error) {
-    // 5️⃣ Handle duplicate entry (fallback for race conditions)
-    if (error.code === 11000) {
-      return res.status(409).json({
-        message: "You already have a plant with this nickname",
-      });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res
+        .status(409)
+        .json({ message: "You already have a plant with this nickname" });
     }
 
-    // 6️⃣ Fallback error
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
+/* -------------------- GET USER PLANTS -------------------- */
 exports.getUserPlants = async (req, res) => {
   const plants = await UserPlant.find({ user: req.user }).populate("plant");
 
-  const response = plants.map((userPlant) => {
-    const reminder = calculateReminder(userPlant);
-
-    return {
-      _id: userPlant._id,
-      nickname: userPlant.nickname,
-      plant: userPlant.plant,
-      reminder,
-      wateredHistory: userPlant.wateredHistory,
-    };
-  });
+  const response = plants.map((up) => ({
+    _id: up._id,
+    nickname: up.nickname,
+    plant: up.plant,
+    reminder: calculateReminder(up),
+    wateredHistory: up.wateredHistory,
+  }));
 
   res.json(response);
 };
 
+/* -------------------- WATER PLANT -------------------- */
 exports.waterPlant = async (req, res) => {
   const userPlant = await UserPlant.findById(req.params.id).populate("plant");
 
@@ -88,12 +81,10 @@ exports.waterPlant = async (req, res) => {
     return res.status(403).json({ message: "Not authorized" });
   }
 
-  const plant = userPlant.plant;
+  const { plant, wateredHistory } = userPlant;
 
-  if (userPlant.wateredHistory.length > 0) {
-    const lastWatered =
-      userPlant.wateredHistory[userPlant.wateredHistory.length - 1].date;
-
+  if (wateredHistory.length) {
+    const lastWatered = wateredHistory[wateredHistory.length - 1].date;
     const nextAllowed = new Date(
       lastWatered.getTime() +
         plant.waterFrequencyDays * 24 * 60 * 60 * 1000
@@ -116,10 +107,11 @@ exports.waterPlant = async (req, res) => {
   });
 };
 
+/* -------------------- UPDATE USER PLANT -------------------- */
 exports.updateUserPlant = async (req, res) => {
   const { nickname } = req.body;
 
-  if (!nickname || nickname.trim() === "") {
+  if (!nickname || !nickname.trim()) {
     return res.status(400).json({ message: "Nickname cannot be empty" });
   }
 
@@ -133,12 +125,13 @@ exports.updateUserPlant = async (req, res) => {
     return res.status(403).json({ message: "Not authorized" });
   }
 
-  userPlant.nickname = nickname;
+  userPlant.nickname = nickname.trim();
   await userPlant.save();
 
   res.json(userPlant);
 };
 
+/* -------------------- DELETE USER PLANT -------------------- */
 exports.deleteUserPlant = async (req, res) => {
   const userPlant = await UserPlant.findById(req.params.id);
 
@@ -151,18 +144,15 @@ exports.deleteUserPlant = async (req, res) => {
   }
 
   await userPlant.deleteOne();
-
   res.json({ message: "Plant removed from your collection 🪴" });
 };
 
+/* -------------------- REMINDER HELPER -------------------- */
 const calculateReminder = (userPlant) => {
   const frequency = userPlant.plant.waterFrequencyDays;
 
-  if (userPlant.wateredHistory.length === 0) {
-    return {
-      nextWaterDate: new Date(),
-      daysLeft: 0,
-    };
+  if (!userPlant.wateredHistory.length) {
+    return { nextWaterDate: new Date(), daysLeft: 0 };
   }
 
   const lastWatered =
@@ -173,8 +163,10 @@ const calculateReminder = (userPlant) => {
   );
 
   const diffMs = nextWaterDate - new Date();
-  const daysLeft = Math.max(Math.ceil(diffMs / (1000 * 60 * 60 * 24)), 0);
+  const daysLeft = Math.max(
+    Math.ceil(diffMs / (1000 * 60 * 60 * 24)),
+    0
+  );
 
   return { nextWaterDate, daysLeft };
 };
-
