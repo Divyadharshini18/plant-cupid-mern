@@ -48,7 +48,7 @@ exports.addUserPlant = async (req, res) => {
       return res
         .status(409)
         .json({ message: "You already have a plant with this nickname" });
-    }
+    } // 11000 is duplicate key error code
 
     res.status(500).json({ message: err.message });
   }
