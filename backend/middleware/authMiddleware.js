@@ -5,10 +5,10 @@ const protect = (req, res, next) => {
 
   if (req.headers.authorization?.startsWith("Bearer")) {
     try {
-      token = req.headers.authorization.split(" ")[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      token = req.headers.authorization.split(" ")[1]; // format : "Bearer eyJhbGciOiJIUzI1NiIs..."
+      const decoded = jwt.verify(token, process.env.JWT_SECRET); // { id: user_id, iat: issued_at, exp: expiration_time }
       req.user = decoded.id;
-      return next();
+      return next(); // continue to the next middleware or route handler
     } catch (error) {
       return res.status(401).json({ message: "Not authorized, token invalid" });
     }
