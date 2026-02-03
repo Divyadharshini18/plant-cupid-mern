@@ -1,11 +1,11 @@
-const mongoose = require("mongoose");
+const { Schema, model } = require("mongoose");
 
-const plantSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  waterFrequency: Number, // days
+const plantSchema = new Schema({
+  name: { type: String, required: true }, // mandatory field 
+  waterFrequency: Number,
   sunlight: String,
   temperature: String,
   tips: [String],
 });
 
-module.exports = mongoose.model("Plant", plantSchema);
+module.exports = model("Plant", plantSchema);
