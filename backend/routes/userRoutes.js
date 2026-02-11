@@ -1,14 +1,13 @@
-const express = require("express");
+const { Router } = require("express");
 const protect = require("../middleware/authMiddleware");
 const { registerUser } = require("../controllers/authController");
 const User = require("../models/User");
 
-const router = express.Router();
+const router = Router();
 
-// Register route - matches frontend expectation of /api/users/register
 router.post("/register", (req, res, next) => {
   console.log("POST /api/users/register - Request received:", {
-    body: { ...req.body, password: "[REDACTED]" }
+    body: { ...req.body, password: "[REDACTED]" },
   });
   registerUser(req, res, next);
 });
