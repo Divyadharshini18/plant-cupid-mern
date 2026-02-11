@@ -1,5 +1,5 @@
-const express = require("express");
-const protect = require("../middleware/authMiddleware");
+const { Router } = require("express");
+const protect = require("../middleware/authMiddleware"); // only authenticated users can access these routes 
 const {
   addUserPlant,
   getUserPlants,
@@ -8,9 +8,9 @@ const {
   deleteUserPlant,
 } = require("../controllers/userPlantController");
 
-const router = express.Router();
+const router = Router();
 
-router.post("/", protect, addUserPlant);
+router.post("/", protect, addUserPlant); // checks before controller 
 router.get("/", protect, getUserPlants);
 router.post("/:id/water", protect, waterPlant);
 router.patch("/:id", protect, updateUserPlant);
