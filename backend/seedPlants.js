@@ -5,8 +5,6 @@ const Plant = require("./models/Plant");
 
 dotenv.config();
 
-// Target list of sample plants to seed
-// Names are important; we use them as a natural key (case-insensitive)
 const samplePlants = [
   {
     name: "Snake Plant",
@@ -20,7 +18,10 @@ const samplePlants = [
     waterFrequency: 3,
     sunlight: "Full sun",
     temperature: "15-26°C (60-80°F)",
-    tips: ["Plant in well-draining soil", "Deadhead spent blooms to encourage flowering"],
+    tips: [
+      "Plant in well-draining soil",
+      "Deadhead spent blooms to encourage flowering",
+    ],
   },
   {
     name: "Tulip",
@@ -50,15 +51,14 @@ const seedPlants = async () => {
     await connectDB();
 
     console.log("Seeding initial plants...");
-    console.log(`Using MONGO_URI: ${process.env.MONGO_URI ? "[SET]" : "[NOT SET - CHECK .env]"}`);
+    console.log(
+      `Using MONGO_URI: ${
+        process.env.MONGO_URI ? "[SET]" : "[NOT SET - CHECK .env]"
+      }`
+    );
 
-    // Fetch existing plants once and build a case-insensitive name set
     const existingPlants = await Plant.find(
-      {
-        name: {
-          $in: samplePlants.map((p) => p.name),
-        },
-      },
+      { name: { $in: samplePlants.map((p) => p.name) } },
       { name: 1 }
     );
 
@@ -74,47 +74,46 @@ const seedPlants = async () => {
 
     console.log(`Plants to insert: ${toInsert.length}`);
 
-    if (toInsert.length === 0) {
-      console.log("All sample plants already exist. Nothing to insert.");
-    } else {
+    if (toInsert.length) {
       console.log(`Inserting ${toInsert.length} new plants...`);
       const inserted = await Plant.insertMany(toInsert);
-      inserted.forEach((doc) => {
-        console.log(`✓ Inserted plant: ${doc.name} (${doc._id})`);
-      });
+      inserted.forEach((doc) =>
+        console.log(`✓ Inserted plant: ${doc.name} (${doc._id})`)
+      );
+    } else {
+      console.log("All sample plants already exist. Nothing to insert.");
     }
 
-    // Log skipped plants (case-insensitive)
     samplePlants.forEach((p) => {
       if (existingNameSet.has(p.name.toLowerCase())) {
         console.log(`⊘ Skipped existing plant: ${p.name}`);
       }
     });
 
-    // VERIFICATION: Count total plants in database after seeding
     const totalPlants = await Plant.find();
-    console.log(`\n=== SEEDING VERIFICATION ===`);
+
+    console.log("\n=== SEEDING VERIFICATION ===");
     console.log(`Total plants in database: ${totalPlants.length}`);
     console.log(`Expected plants: ${samplePlants.length}`);
-    
+
     if (totalPlants.length >= samplePlants.length) {
       console.log("✓ SUCCESS: Database has all expected plants");
     } else {
-      console.warn(`⚠ WARNING: Database has ${totalPlants.length} plants, expected ${samplePlants.length}`);
+      console.warn(
+        `⚠ WARNING: Database has ${totalPlants.length} plants, expected ${samplePlants.length}`
+      );
     }
 
-    // List all plant names for verification
     console.log("\nAll plants in database:");
-    totalPlants.forEach((plant, index) => {
-      console.log(`  ${index + 1}. ${plant.name} (${plant._id})`);
-    });
+    totalPlants.forEach((plant, i) =>
+      console.log(`  ${i + 1}. ${plant.name} (${plant._id})`)
+    );
 
     console.log("\nPlant seeding completed.");
   } catch (err) {
     console.error("Error while seeding plants:", err.message);
     console.error(err.stack);
   } finally {
-    // Always close mongoose connection so script exits cleanly
     await mongoose.connection.close();
     console.log("MongoDB connection closed.");
     process.exit(0);
