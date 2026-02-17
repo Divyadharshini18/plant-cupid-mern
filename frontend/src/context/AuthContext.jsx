@@ -7,16 +7,15 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Restore auth from localStorage on app load
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
 
-    if (storedToken) {
-      setToken(storedToken);
-      if (storedUser) {
+    if (token) {
+      setToken(token);
+      if (user) {
         try {
-          setUser(JSON.parse(storedUser));
+          setUser(JSON.parse(user));
         } catch {
           localStorage.removeItem("user");
         }
@@ -26,22 +25,16 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const isAuthenticated = !!token;
-
-  // Login
   const login = useCallback((userData, authToken) => {
     localStorage.setItem("token", authToken);
     localStorage.setItem("user", JSON.stringify(userData));
-
     setToken(authToken);
     setUser(userData);
   }, []);
 
-  // Logout
   const logout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
     setToken(null);
     setUser(null);
   }, []);
@@ -51,7 +44,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         token,
-        isAuthenticated,
+        isAuthenticated: !!token,
         isLoading,
         login,
         logout,
@@ -63,18 +56,16 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const ctx = useContext(AuthContext);
 
-  if (!context) {
-    return {
+  return (
+    ctx || {
       user: null,
       token: null,
       isAuthenticated: false,
       isLoading: false,
       login: () => {},
       logout: () => {},
-    };
-  }
-
-  return context;
+    }
+  );
 };
