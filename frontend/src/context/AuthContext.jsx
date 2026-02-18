@@ -23,21 +23,21 @@ export const AuthProvider = ({ children }) => {
     }
 
     setIsLoading(false);
-  }, []);
+  }, []); // on component mount, check if there is a token and user data in localStorage and set them in state, then set loading to false
 
   const login = useCallback((userData, authToken) => {
     localStorage.setItem("token", authToken);
     localStorage.setItem("user", JSON.stringify(userData));
     setToken(authToken);
     setUser(userData);
-  }, []);
+  }, []); // when login the token and user data are stored in localStorage and set in state
 
   const logout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setToken(null);
     setUser(null);
-  }, []);
+  }, []); // when logout the storage is cleared and the user and token are set null
 
   return (
     <AuthContext.Provider
@@ -67,5 +67,5 @@ export const useAuth = () => {
       login: () => {},
       logout: () => {},
     }
-  );
+  ); // prevent errors when useAuth is used outside of AuthProvider
 };
