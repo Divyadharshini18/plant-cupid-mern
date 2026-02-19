@@ -17,8 +17,7 @@ export default function Dashboard() {
   const [addMessage, setAddMessage] = useState(null);
   const [isAddingPlant, setIsAddingPlant] = useState(false);
 
-  const getStoredToken = () =>
-    token || localStorage.getItem("token");
+  const getStoredToken = () => token || localStorage.getItem("token");
 
   const fetchUserPlants = async () => {
     setIsFetchingPlants(true);
@@ -35,7 +34,7 @@ export default function Dashboard() {
 
       setPlantCount(Array.isArray(res.data) ? res.data.length : 0);
     } catch (err) {
-      if (err.response?.status === 401 || err.response?.status === 403) {
+      if ([401, 403].includes(err.response?.status)) {
         setError("Session expired. Please log in again.");
       } else {
         setError("Unable to load your plants.");
@@ -53,7 +52,7 @@ export default function Dashboard() {
     const fetchAvailablePlants = async () => {
       try {
         const res = await api.get("/plants");
-        if (Array.isArray(res.data) && res.data.length > 0) {
+        if (Array.isArray(res.data) && res.data.length) {
           setAvailablePlants(res.data);
         } else {
           setAvailablePlants([]);
