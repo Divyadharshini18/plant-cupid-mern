@@ -42,11 +42,11 @@ export default function Dashboard() {
     } finally {
       setIsFetchingPlants(false);
     }
-  };
+  }; // fetch user plants only if token exists and an authenticated user is present
 
   useEffect(() => {
     fetchUserPlants();
-  }, [token]);
+  }, [token]); // refetch the plants when token changes
 
   useEffect(() => {
     const fetchAvailablePlants = async () => {
@@ -64,12 +64,12 @@ export default function Dashboard() {
       }
     };
     fetchAvailablePlants();
-  }, []);
+  }, []); // fetch available plants on component mount
 
   const handleLogout = () => {
     logout();
     navigate("/login");
-  };
+  }; // on logout navigate to login page
 
   const handleAddPlant = async (e) => {
     e.preventDefault();
@@ -104,24 +104,24 @@ export default function Dashboard() {
     } finally {
       setIsAddingPlant(false);
     }
-  };
+  }; // handle adding a plant to the user's collection
 
   if (isLoading) {
     return <p className="dashboard-loading">Loading...</p>;
-  }
+  } // show loading while authentication status is being determined
 
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Dashboard 🌱</h1>
 
-      {error && <p className="auth-error">{error}</p>}
-      {addMessage && <p className="auth-success">{addMessage}</p>}
+      {error && <p className="auth-error">{error}</p>} // show error messages
+      {addMessage && <p className="auth-success">{addMessage}</p>} // show add plant status messages
 
       {isAuthenticated && plantCount !== null && (
         <p className="dashboard-info">
           Your plants in collection: <strong>{plantCount}</strong>
         </p>
-      )}
+      )} // show plant count 
 
       {isAuthenticated && (
         <form className="dashboard-form" onSubmit={handleAddPlant}>
@@ -162,7 +162,7 @@ export default function Dashboard() {
             {isAddingPlant ? "Adding..." : "Add Plant"}
           </button>
         </form>
-      )}
+      )} // adding a plant form
 
       {isAuthenticated && user ? (
         <div className="dashboard-user">
@@ -174,7 +174,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <p>Please log in to access your dashboard.</p>
-      )}
+      )} // Show user info and logout button if the user is authenticated
     </div>
   );
 }
