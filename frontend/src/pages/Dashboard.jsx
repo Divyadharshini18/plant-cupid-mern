@@ -114,14 +114,14 @@ export default function Dashboard() {
     <div className="dashboard-container">
       <h1 className="dashboard-title">Dashboard 🌱</h1>
 
-      {error && <p className="auth-error">{error}</p>} // show error messages
-      {addMessage && <p className="auth-success">{addMessage}</p>} // show add plant status messages
+      {error && <p className="auth-error">{error}</p>} {/* show error messages */}
+      {addMessage && <p className="auth-success">{addMessage}</p>} {/* shw add plant status messages */}
 
       {isAuthenticated && plantCount !== null && (
         <p className="dashboard-info">
           Your plants in collection: <strong>{plantCount}</strong>
         </p>
-      )} // show plant count 
+      )} {/* show plant count */}
 
       {isAuthenticated && (
         <form className="dashboard-form" onSubmit={handleAddPlant}>
@@ -162,7 +162,7 @@ export default function Dashboard() {
             {isAddingPlant ? "Adding..." : "Add Plant"}
           </button>
         </form>
-      )} // adding a plant form
+      )} {/* adding a plant form */}
 
       {isAuthenticated && user ? (
         <div className="dashboard-user">
@@ -174,7 +174,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <p>Please log in to access your dashboard.</p>
-      )} // Show user info and logout button if the user is authenticated
+      )} {/* Show user info and logout button if the user is authenticated */}
     </div>
   );
 }
