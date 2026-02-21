@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
-import "../index.css"
+import "../index.css";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -31,13 +31,11 @@ export default function Login() {
         return;
       }
 
-      const userData = {
-        _id: res.data._id,
-        name: res.data.name,
-        email: res.data.email,
-      };
+      login(
+        { _id: res.data._id, name: res.data.name, email: res.data.email },
+        res.data.token
+      );
 
-      login(userData, res.data.token);
       navigate("/dashboard");
     } catch (err) {
       if (err.response?.status === 401) {
