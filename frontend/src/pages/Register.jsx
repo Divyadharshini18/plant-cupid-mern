@@ -30,12 +30,12 @@ export default function Register() {
     }
 
     try {
-      await api.post("/users/register", { name, email, password });
+      await api.post("/users/register", { name, email, password }); // send data to backend
       setSuccess(true);
       setName("");
       setEmail("");
       setPassword("");
-      navigate("/login");
+      navigate("/login"); // redirect to login page after successful registration
     } catch (err) {
       if (err.response?.status === 409) {
         setError("An account with this email already exists");
