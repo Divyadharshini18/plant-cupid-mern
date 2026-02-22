@@ -27,7 +27,7 @@ export default function Login() {
       const res = await api.post("/auth/login", { email, password });
 
       if (!res.data.token) {
-        setError("Login successful but no token received");
+        setError("Login successful but no token received"); // This should not happen, but we handle it just in case
         return;
       }
 
@@ -36,7 +36,7 @@ export default function Login() {
         res.data.token
       );
 
-      navigate("/dashboard");
+      navigate("/dashboard"); // login successful, redirect to dashboard
     } catch (err) {
       if (err.response?.status === 401) {
         setError("Invalid email or password");
