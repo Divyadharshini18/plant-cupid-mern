@@ -1,3 +1,53 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Home */
+
+.home-bg {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0A3323 0%, #105666 50%, #839958 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #F7F4D5;
+  padding: 40px 20px;
+}
+
+.home-bg{
+  font-size: 26px;
+  font-weight: 500;
+}
+
+.home-bg .log-sign-buttons {
+  display: flex;
+  gap: 20px;
+  padding: 40px;
+}
+
+.home-bg .log-sign-buttons button {
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: #D3968C;
+  color: #F7F4D5;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.home-bg .log-sign-buttons button:hover {
+  background-color: #839958;
+  transform: translateY(-3px);
+}
+
 /* Login */
 
 .login-container {
