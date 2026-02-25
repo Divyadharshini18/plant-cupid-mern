@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken"); // used for stateless authentication
 const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" }); // jwt.sign(payload, secret, options)
 
-const registerUser = async (req, res) => {
+const signupUser = async (req, res) => {
   const { name, email, password } = req.body; // destructuring the name, email, and password from the request body
 
   try {
@@ -43,4 +43,4 @@ const loginUser = async (req, res) => {
   res.status(401).json({ message: "Invalid credentials" }); // 401 unathorized or invalid credentials
 };
 
-module.exports = { registerUser, loginUser }; // making it available for other files
+module.exports = { signupUser, loginUser }; // making it available for other files

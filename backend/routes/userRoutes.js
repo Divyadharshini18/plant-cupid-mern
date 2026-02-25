@@ -1,15 +1,15 @@
 const { Router } = require("express");
 const protect = require("../middleware/authMiddleware");
-const { registerUser } = require("../controllers/authController");
+const { signupUser } = require("../controllers/authController");
 const User = require("../models/User");
 
 const router = Router();
 
-router.post("/register", (req, res, next) => {
-  console.log("POST /api/users/register - Request received:", {
+router.post("/signup", (req, res, next) => {
+  console.log("POST /api/users/signup - Request received:", {
     body: { ...req.body, password: "[REDACTED]" },
   });
-  registerUser(req, res, next);
+  signupUser(req, res, next);
 });
 
 router.get("/profile", protect, async (req, res) => {

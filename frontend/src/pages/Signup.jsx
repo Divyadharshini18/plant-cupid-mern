@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 
-export default function Register() {
+export default function Signup() {
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -30,7 +30,7 @@ export default function Register() {
     }
 
     try {
-      await api.post("/users/register", { name, email, password }); // send data to backend
+      await api.post("/users/signup", { name, email, password }); // send data to backend
       setSuccess(true);
       setName("");
       setEmail("");
@@ -44,7 +44,7 @@ export default function Register() {
       } else if (err.request) {
         setError("Cannot connect to server");
       } else {
-        setError("Registration failed");
+        setError("Signup failed");
       }
       setSuccess(false);
     } finally {
@@ -57,7 +57,7 @@ export default function Register() {
       <h2 className="auth-title">Create Account 🌸</h2>
 
       {error && <p className="auth-error">{error}</p>}
-      {success && <p className="auth-success">Registration successful!</p>}
+      {success && <p className="auth-success">Signup successful!</p>}
 
       <input
         className="auth-input"
@@ -86,7 +86,7 @@ export default function Register() {
         onClick={handleRegister}
         disabled={isLoading}
       >
-        {isLoading ? "Registering..." : "Register"}
+        {isLoading ? "Signing up..." : "Sign up"}
       </button>
     </div>
   );
