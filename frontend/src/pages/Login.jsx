@@ -83,8 +83,8 @@ export default function Login() {
 
       <p className="login-footer">
         Don't have an account?{" "}
-        <Link className="login-link" to="/register">
-          Register
+        <Link className="login-link" to="/signup">
+          Sign up
         </Link>
       </p>
     </div>

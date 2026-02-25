@@ -54,7 +54,7 @@ export default function Signup() {
 
   return (
     <div className="auth-container">
-      <h2 className="auth-title">Create Account 🌸</h2>
+      <h2 className="auth-title">New Phytophile 🌸</h2>
 
       {error && <p className="auth-error">{error}</p>}
       {success && <p className="auth-success">Signup successful!</p>}
