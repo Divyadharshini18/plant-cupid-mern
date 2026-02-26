@@ -54,7 +54,7 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      <h2 className="login-title">Welcome phytophile 🌱</h2>
+      <h2 className="login-title">Login phytophile 🌱</h2>
 
       {error && <p className="login-error">{error}</p>}
 

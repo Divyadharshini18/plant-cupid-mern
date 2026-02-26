@@ -15,7 +15,7 @@ function Home() {
                 setDisplay(text.slice(0, index+1));
                 setIndex(index+1);
                 if(index+1 == text.length){
-                    setTimeout(() => setIsDelete(true), 1000);
+                    setTimeout(() => setIsDelete(true), 2000);
                 }
             }
             else{
