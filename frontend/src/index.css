@@ -31,6 +31,7 @@
 }
 
 .home-bg .log-sign-buttons button {
+  width: 150px;
   padding: 12px 28px;
   font-size: 16px;
   font-weight: 600;
@@ -46,6 +47,18 @@
 .home-bg .log-sign-buttons button:hover {
   background-color: #839958;
   transform: translateY(-3px);
+}
+
+.typing-text::after {
+  content: "|";
+  margin-left: 5px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* Login */
