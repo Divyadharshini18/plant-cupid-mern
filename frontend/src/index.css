@@ -108,6 +108,7 @@
   font-size: 16px;
   font-weight: 600;
   width: 380px;
+  cursor: pointer;
 }
 
 .login-footer .login-link {
