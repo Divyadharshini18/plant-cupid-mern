@@ -36,7 +36,9 @@ export default function Signup() {
       setName("");
       setEmail("");
       setPassword("");
-      navigate("/login"); // redirect to login page after successful registration
+      setTimeout(() => {
+        navigate("/login");
+      },2000); // redirect to login page after successful registration
     } catch (err) {
       if (err.response?.status === 409) {
         setError("An account with this email already exists");
