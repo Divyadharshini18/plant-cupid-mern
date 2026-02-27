@@ -11,6 +11,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -36,7 +37,12 @@ export default function Login() {
         res.data.token
       );
 
-      navigate("/dashboard"); // login successful, redirect to dashboard
+      setSuccess(true);
+      setTimeout(() => {
+        setIsLoading(false);
+        navigate("/dashboard"); // login successful, redirect to dashboard
+      }, 1000);
+
     } catch (err) {
       if (err.response?.status === 401) {
         setError("Invalid email or password");
@@ -47,16 +53,17 @@ export default function Login() {
       } else {
         setError("Something went wrong");
       }
-    } finally {
+      setSuccess(false);
       setIsLoading(false);
     }
   };
 
   return (
     <div className="login-container">
-      <h2 className="login-title">Login phytophile 🌱</h2>
+      <h2 className="login-title">Login phytophile !</h2>
 
       {error && <p className="login-error">{error}</p>}
+      {success && <p className="login-success">Login successful!</p>}
 
       <input
         className="login-input"
