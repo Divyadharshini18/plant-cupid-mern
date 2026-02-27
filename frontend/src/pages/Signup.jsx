@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import "../index.css";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -53,28 +54,28 @@ export default function Signup() {
   };
 
   return (
-    <div className="auth-container">
-      <h2 className="auth-title">New Phytophile 🌸</h2>
+    <div className="login-container">
+      <h2 className="login-title">New Phytophile 🌸</h2>
 
-      {error && <p className="auth-error">{error}</p>}
-      {success && <p className="auth-success">Signup successful!</p>}
+      {error && <p className="login-error">{error}</p>}
+      {success && <p className="login-success">Signup successful!</p>}
 
       <input
-        className="auth-input"
+        className="login-input"
         placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
 
       <input
-        className="auth-input"
+        className="login-input"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
 
       <input
-        className="auth-input"
+        className="login-input"
         type="password"
         placeholder="Password"
         value={password}
@@ -82,7 +83,7 @@ export default function Signup() {
       />
 
       <button
-        className="auth-button"
+        className="login-button"
         onClick={handleRegister}
         disabled={isLoading}
       >
