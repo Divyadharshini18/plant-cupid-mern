@@ -119,6 +119,12 @@
   font-weight: 600;
   width: 380px;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #839958;
+  transform: translateY(-3px);
 }
 
 .login-footer .login-link {
