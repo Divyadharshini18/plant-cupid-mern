@@ -32,14 +32,16 @@ export default function Login() {
         return;
       }
 
-      login(
-        { _id: res.data._id, name: res.data.name, email: res.data.email },
-        res.data.token
-      );
-
+      
       setSuccess(true);
+      
       setTimeout(() => {
+        login(
+          { _id: res.data._id, name: res.data.name, email: res.data.email },
+          res.data.token
+        );
         setIsLoading(false);
+
         navigate("/dashboard"); // login successful, redirect to dashboard
       }, 1000);
 
