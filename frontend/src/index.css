@@ -66,6 +66,7 @@
 .login-container {
   background: linear-gradient( to bottom, #F7F4D5 0%, #D3968C 100%);
   height: 100vh;
+  padding: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -134,13 +135,13 @@
 /* Dashboard */
 
 .dashboard-container {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 30px;
+  background: linear-gradient(to bottom, #F7F4D5 0%, #D3968C 100%);
+  height: 100vh;
+  padding: 40px;
 }
 
 .dashboard-title {
-  color: #2f855a;
+  color: #105666;
   margin-bottom: 10px;
 }
 
