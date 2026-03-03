@@ -9,13 +9,13 @@
 
 .home-bg {
   min-height: 100vh;
-  background: linear-gradient(to bottom, #0A3323 0%, #105666 50%, #839958 100%);
+  background: linear-gradient(to bottom, #F7F4D5 0%, #D3968C 100%);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  color: #F7F4D5;
+  color: #105666;
   padding: 40px 20px;
 }
 
@@ -35,7 +35,7 @@
   padding: 12px 28px;
   font-size: 16px;
   font-weight: 600;
-  background-color: #D3968C;
+  background-color: #0A3323;
   color: white;
   border: none;
   border-radius: 30px;
@@ -64,14 +64,14 @@
 /* Login and reused for signup page*/
 
 .login-container {
-  background: linear-gradient(to bottom, #0A3323 0%, #105666 50%, #839958 100%);
+  background: linear-gradient( to bottom, #F7F4D5 0%, #D3968C 100%);
   height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 18px;
-  color: #F7F4D5;
+  color: #105666;
 }
 
 .login-title {
@@ -81,11 +81,10 @@
 }
 
 .login-error {
-  background-color: #D3968C;
+  background-color: red;
   color: white;
   width: 380px;
   border-radius: 10px;
-  border-left: #c53030 6px solid;
   padding: 12px;
   text-align: center;
 }
@@ -95,7 +94,6 @@
   color: white;
   width: 380px;
   border-radius: 10px;
-  border-left: #0A3323 6px solid;
   padding: 12px;
   text-align: center;
 }
@@ -113,7 +111,7 @@
   padding: 15px;
   border-radius: 12px;
   border: none;
-  background-color: #D3968C;
+  background-color: #0A3323;
   color: white;
   font-size: 16px;
   font-weight: 600;
