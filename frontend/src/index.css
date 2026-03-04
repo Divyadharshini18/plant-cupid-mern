@@ -127,7 +127,7 @@
 }
 
 .login-footer .login-link {
-  color: white;
+  color: #0A3323;
   font-weight: 500;
   padding: 20px;
 }
@@ -135,7 +135,7 @@
 /* Dashboard */
 
 .dashboard-container {
-  background: linear-gradient(to bottom, #F7F4D5 0%, #D3968C 100%);
+  background-color: #F7F4D5;
   height: 100vh;
   padding: 40px;
 }
