@@ -103,7 +103,7 @@
 
 .feature-card{
   width: 350px;
-  height: 280px;
+  height: 380px;
   padding:30px;
   border-radius:20px;
   background:rgba(255,255,255,0.08);
@@ -116,12 +116,11 @@
 }
 
 .card-img{
-  height:150px;
+  height:250px;
   border-radius:15px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin-bottom:15px;
+  background-size:cover;
+  background-position:center;
+  margin-bottom:20px;
 }
 
 .how{

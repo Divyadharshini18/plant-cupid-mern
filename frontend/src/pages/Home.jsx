@@ -61,17 +61,17 @@ export default function Home() {
         <h2>Grow Smarter !</h2>
         <div className="feature-grid">
           <div className="feature-card">
-            <div className="card-img">Image</div>
+            <div className="card-img" style={{backgroundImage: "url('../../public/f1.png')" }}></div>
             <h3>Track Plants</h3>
             <p>Monitor all your plants in one place.</p>
           </div>
           <div className="feature-card">
-            <div className="card-img">Image</div>
+            <div className="card-img" style={{ backgroundImage: "url('../../public/f2.png')" }}></div>
             <h3>Water Reminders</h3>
             <p>Never forget watering again.</p>
           </div>
           <div className="feature-card">
-            <div className="card-img">Image</div>
+            <div className="card-img" style={{ backgroundImage: "url('../../public/f3.png')" }}></div>
             <h3>Plant Care</h3>
             <p>Get smart tips for healthy plants.</p>
           </div>
