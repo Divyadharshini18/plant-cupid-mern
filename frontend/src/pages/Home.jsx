@@ -52,7 +52,7 @@ export default function Home() {
         </div>
         <div className="hero-image">
           <div className="image-placeholder">
-            <img src="../../public/hero-img.png" alt="" className="image-placeholder"/>
+            <img src="./hero-img.png" alt="" className="image-placeholder"/>
           </div>
         </div>
       </section>
@@ -61,17 +61,17 @@ export default function Home() {
         <h2>Grow Smarter !</h2>
         <div className="feature-grid">
           <div className="feature-card">
-            <div className="card-img" style={{backgroundImage: "url('../../public/f1.png')" }}></div>
+            <div className="card-img" style={{backgroundImage: "url('./f1.png')" }}></div>
             <h3>Track Plants</h3>
             <p>Monitor all your plants in one place.</p>
           </div>
           <div className="feature-card">
-            <div className="card-img" style={{ backgroundImage: "url('../../public/f2.png')" }}></div>
+            <div className="card-img" style={{ backgroundImage: "url('./f2.png')" }}></div>
             <h3>Water Reminders</h3>
             <p>Never forget watering again.</p>
           </div>
           <div className="feature-card">
-            <div className="card-img" style={{ backgroundImage: "url('../../public/f3.png')" }}></div>
+            <div className="card-img" style={{ backgroundImage: "url('./f3.png')" }}></div>
             <h3>Plant Care</h3>
             <p>Get smart tips for healthy plants.</p>
           </div>
@@ -80,8 +80,7 @@ export default function Home() {
 
       <section className="how">
         <div className="how-image">
-          <div className="image-placeholder">
-            Plant Image
+          <div className="image-placeholder" style={{ backgroundImage: "url('./how.png')" }}>
           </div>
         </div>
         <div className="how-text">
@@ -91,7 +90,7 @@ export default function Home() {
             for watering and care. Our platform keeps your plants
             healthy and thriving.
           </p>
-          <button className="secondary">
+          <button className="secondary" onClick={() => window.location.href="/signup"}>
             Start Growing
           </button>
         </div>
