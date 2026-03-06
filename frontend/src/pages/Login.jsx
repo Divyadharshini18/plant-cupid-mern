@@ -61,41 +61,46 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      <div className="login">
-        <h2 className="login-title">Login phytophile !</h2>
+      <div className="log-con">
+        <div className="login-img">
+          <img src="./log-img.png" alt="business-women" />
+        </div>
+        <div className="login">
+          <h2 className="login-title">Login phytophile !</h2>
 
-        {error && <p className="login-error">{error}</p>}
-        {success && <p className="login-success">Login successful!</p>}
+          {error && <p className="login-error">{error}</p>}
+          {success && <p className="login-success">Login successful!</p>}
 
-        <input
-          className="login-input"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          <input
+            className="login-input"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-        <input
-          className="login-input"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <input
+            className="login-input"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        <button
-          className="login-button"
-          onClick={handleLogin}
-          disabled={isLoading}
-        >
-          {isLoading ? "Logging in..." : "Login"}
-        </button>
+          <button
+            className="login-button"
+            onClick={handleLogin}
+            disabled={isLoading}
+          >
+            {isLoading ? "Logging in..." : "Login"}
+          </button>
 
-        <p className="login-footer">
-          Don't have an account?{" "}
-          <Link className="login-link" to="/signup">
-            Sign up
-          </Link>
-        </p>
+          <p className="login-footer">
+            Don't have an account?{" "}
+            <Link className="login-link" to="/signup">
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
