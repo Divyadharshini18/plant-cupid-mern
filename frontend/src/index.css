@@ -182,6 +182,10 @@
 
 .footer{
   padding:80px 10%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 20px;
   text-align:center;
   background:rgba(0,0,0,0.2);
 }
@@ -190,7 +194,7 @@
   margin-top:20px;
   display:flex;
   justify-content:center;
-  gap:30px;
+  gap:50px;
   opacity:0.8;
 }
 
