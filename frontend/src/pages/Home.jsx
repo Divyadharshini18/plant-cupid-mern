@@ -80,8 +80,7 @@ export default function Home() {
 
       <section className="how">
         <div className="how-image">
-          <div className="image-placeholder" style={{ backgroundImage: "url('./how.png')" }}>
-          </div>
+          <img src="./how.png" alt="Plant care" className="how-img" />
         </div>
         <div className="how-text">
           <h2>How PlantCupid Helps</h2>
