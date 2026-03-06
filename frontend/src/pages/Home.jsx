@@ -89,7 +89,7 @@ export default function Home() {
             for watering and care. Our platform keeps your plants
             healthy and thriving.
           </p>
-          <button className="secondary" onClick={() => window.location.href="/signup"}>
+          <button className="secondary" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
             Start Growing
           </button>
         </div>
