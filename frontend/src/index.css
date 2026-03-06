@@ -203,24 +203,67 @@
   animation:blink 1s infinite;
 }
 
-@keyframes blink{
-  50%{
-    opacity:0;
-  }
+@media (max-width:900px){
+
+.hero{
+  flex-direction:column;
+  gap:40px;
+  text-align:center;
+  padding:60px 6%;
 }
 
-@media(max-width:900px){
-.hero{
-flex-direction:column;
-gap:40px;
-text-align:center;
+.hero-text h1{
+  font-size:2.5rem;
+}
+
+.hero-text h2{
+  font-size:1.4rem;
+}
+
+.hero-image .image-placeholder{
+  width:100%;
+  max-width:350px;
+  height:350px;
+}
+
+.hero-buttons{
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.features{
+  padding:70px 6%;
+}
+
+.feature-grid{
+  flex-direction:column;
+  align-items:center;
+}
+
+.feature-card{
+  width:100%;
+  max-width:350px;
+  height:auto;
 }
 
 .how{
-flex-direction:column;
-gap:40px;
-text-align:center;
+  flex-direction:column;
+  gap:40px;
+  text-align:center;
+  padding:70px 6%;
 }
+
+.how-image .image-placeholder{
+  width:100%;
+  max-width:350px;
+  height:350px;
+}
+
+.footer-links{
+  flex-direction:column;
+  gap:15px;
+}
+
 }
 
 /* Login and reused for signup page*/
@@ -316,17 +359,42 @@ text-align:center;
   text-align: center;
 }
 
-@media(max-width:900px){
+@media (max-width:900px){
 
-  .login-container{
+  .log-con{
     flex-direction:column;
-    gap:40px;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
     text-align:center;
+    height:auto;
+    width:90%;
   }
 
   .login-img{
-    width:90%;
-    height:350px;
+    width:100%;
+    height:220px;
+    margin-bottom:20px;
+  }
+
+  .login-img img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+
+  .login{
+    width:100%;
+    height:auto;
+    padding:20px;
+  }
+
+  .login-input{
+    width:100%;
+  }
+
+  .login-button{
+    width:100%;
   }
 
 }

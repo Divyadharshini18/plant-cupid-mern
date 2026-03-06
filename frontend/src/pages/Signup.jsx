@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import "../index.css";
+import { Link } from "react-router-dom";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -57,40 +58,55 @@ export default function Signup() {
 
   return (
     <div className="login-container">
-      <h2 className="login-title">New Phytophile !</h2>
+      <div className="log-con">
+        <div className="login-img">
+          <img src="./sig-img.png" alt="business-women" />
+        </div>
 
-      {error && <p className="login-error">{error}</p>}
-      {success && <p className="login-success">Signup successful!</p>}
+        <div className="login">
+          <h2 className="login-title">New Phytophile !</h2>
 
-      <input
-        className="login-input"
-        placeholder="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+          {error && <p className="login-error">{error}</p>}
+          {success && <p className="login-success">Signup successful!</p>}
 
-      <input
-        className="login-input"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+          <input
+            className="login-input"
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
 
-      <input
-        className="login-input"
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+          <input
+            className="login-input"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-      <button
-        className="login-button"
-        onClick={handleRegister}
-        disabled={isLoading}
-      >
-        {isLoading ? "Signing up..." : "Sign up"}
-      </button>
+          <input
+            className="login-input"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <button
+            className="login-button"
+            onClick={handleRegister}
+            disabled={isLoading}
+          >
+            {isLoading ? "Signing up..." : "Sign up"}
+          </button>
+
+          <p className="login-footer">
+            Already have an account?{" "}
+            <Link className="login-link" to="/login">
+              Login
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
