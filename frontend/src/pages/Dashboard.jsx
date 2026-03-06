@@ -68,7 +68,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/");
   }; // on logout navigate to login page
 
   const handleAddPlant = async (e) => {
