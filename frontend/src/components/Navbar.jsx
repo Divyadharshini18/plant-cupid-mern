@@ -14,9 +14,11 @@ function Navbar() {
 
   return (
     <div className="navbar">
-      <Link to="/profile" className="nav-link">Profile</Link>
+      <div className="title">Plant Cupid</div>
+
       <Link to="/dashboard" className="nav-link">Dashboard</Link>
       <Link to="/plants" className="nav-link">Plants</Link>
+      <Link to="/profile" className="nav-link">Profile</Link>
       <Link to="/about" className="nav-link">About Us</Link>
 
       <div className="nav-right">
