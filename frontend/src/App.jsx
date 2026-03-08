@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import Navbar from "./components/Navbar";
 
 console.log("App.jsx: Rendering routes");
 
@@ -16,6 +17,7 @@ export default function App() {
       <Route path="/login" element={isAuthenticated ? ( <Navigate to="/dashboard" replace/> ) : <Login /> } />
       <Route path="/signup" element={isAuthenticated ? ( <Navigate to="/dashboard" replace/> ) : <Signup /> } />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/navbar" element={<Navbar />} />
     </Routes>
   );
 }

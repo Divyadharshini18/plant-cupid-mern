@@ -397,3 +397,19 @@
   }
 
 }
+
+/* Navbar */
+
+.navbar{
+  height: 60px;
+  width: 90%;
+  background-color: #D3968C;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50px;
+  margin: auto;
+  margin-top: 15px;
+}
+
