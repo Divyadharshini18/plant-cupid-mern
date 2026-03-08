@@ -14,7 +14,7 @@ function Navbar() {
 
   return (
     <div className="navbar">
-      <div className="title">Plant Cupid</div>
+      <div className="title">Plant Cupid | </div>
 
       <Link to="/dashboard" className="nav-link">Dashboard</Link>
       <Link to="/plants" className="nav-link">Plants</Link>

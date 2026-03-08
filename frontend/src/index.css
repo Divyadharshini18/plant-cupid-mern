@@ -413,3 +413,19 @@
   margin-top: 15px;
 }
 
+.navbar .title{
+  font-weight: 800;
+  font-size: large;
+}
+
+.navbar .nav-link{
+  color: black;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.navbar .nav-link:hover{
+  color: #F7F4D5;
+  transform: translateY(-3px);
+}
