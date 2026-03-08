@@ -429,3 +429,20 @@
   color: #F7F4D5;
   transform: translateY(-3px);
 }
+
+.nav-logout{
+  padding: 8px 20px;
+  border: none;
+  border-radius: 25px;
+  background-color: #0A3323;
+  color: #F7F4D5;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-logout:hover{
+  background-color: #F7F4D5;
+  color: #0A3323;
+  transform: translateY(-3px);
+}
