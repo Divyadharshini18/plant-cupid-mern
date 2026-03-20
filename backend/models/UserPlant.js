@@ -26,7 +26,4 @@ const userPlantSchema = new Schema(
   },
   { timestamps: true }
 );
-
-userPlantSchema.index({ user: 1, plant: 1 }, { unique: true }); // a user cannot add the same plant twice
-
 module.exports = model("UserPlant", userPlantSchema);
