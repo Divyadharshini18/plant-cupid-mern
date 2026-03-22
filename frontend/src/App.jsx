@@ -17,7 +17,6 @@ export default function App() {
       <Route path="/login" element={isAuthenticated ? ( <Navigate to="/dashboard" replace/> ) : <Login /> } />
       <Route path="/signup" element={isAuthenticated ? ( <Navigate to="/dashboard" replace/> ) : <Signup /> } />
       <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/navbar" element={<Navbar />} />
     </Routes>
   );
 }
