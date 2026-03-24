@@ -86,24 +86,23 @@ exports.waterPlant = async (req, res) => {
   if (wateredHistory.length) {
     const lastWatered = wateredHistory[wateredHistory.length - 1].date;
     const nextAllowed = new Date(
-      lastWatered.getTime() +
-        plant.waterFrequencyDays * 24 * 60 * 60 * 1000 // JS calculates days in milliseconds
+      lastWatered.getTime() + plant.waterFrequency * 24 * 60 * 60 * 1000
     );
 
     if (new Date() < nextAllowed) {
       return res.status(400).json({
-        message: "Plant watered recently 🌱",
+        message: "Plant already watered. Wait until next cycle 🌱",
         nextWaterDate: nextAllowed,
       });
     }
   }
 
   userPlant.wateredHistory.push({ date: new Date() });
-  await userPlant.save(); // save is used to persist the changes in the DB
+  await userPlant.save();
 
   res.json({
     message: "Plant watered successfully 💧",
-    nextWaterInDays: plant.waterFrequencyDays,
+    nextWaterInDays: plant.waterFrequency,
   });
 };
 
@@ -149,7 +148,7 @@ exports.deleteUserPlant = async (req, res) => {
 
 /* -------------------- REMINDER HELPER -------------------- */
 const calculateReminder = (userPlant) => {
-  const frequency = userPlant.plant.waterFrequencyDays;
+  const frequency = userPlant.plant.waterFrequency;
 
   if (!userPlant.wateredHistory.length) {
     return { nextWaterDate: new Date(), daysLeft: 0 };
@@ -166,7 +165,7 @@ const calculateReminder = (userPlant) => {
   const daysLeft = Math.max(
     Math.ceil(diffMs / (1000 * 60 * 60 * 24)),
     0
-  ); // ignore negative days
+  );
 
   return { nextWaterDate, daysLeft };
 };

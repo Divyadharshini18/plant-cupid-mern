@@ -1,19 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/api";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const { user, token, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, token, isAuthenticated, isLoading } = useAuth();
 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
   const [userPlants, setUserPlants] = useState([]);
   const [availablePlants, setAvailablePlants] = useState([]);
-  const [plantsUnavailableMessage, setPlantsUnavailableMessage] =
-    useState(null);
+  const [plantsUnavailableMessage, setPlantsUnavailableMessage] = useState(null);
 
   const [newPlantId, setNewPlantId] = useState("");
   const [newNickname, setNewNickname] = useState("");
@@ -22,6 +19,11 @@ export default function Dashboard() {
   const [wateringPlantId, setWateringPlantId] = useState("");
 
   const getStoredToken = () => token || localStorage.getItem("token");
+
+  const clearMessages = () => {
+    setError(null);
+    setSuccess(null);
+  };
 
   const formatDate = (dateValue) => {
     if (!dateValue) return "Today";
@@ -113,14 +115,14 @@ export default function Dashboard() {
     return { totalPlants, dueToday, healthyPlants, recentlyWatered };
   }, [userPlants, duePlants]);
 
-  const clearMessages = () => {
-    setError(null);
-    setSuccess(null);
+  const canWaterPlant = (plant) => {
+    return plant?.reminder?.daysLeft === 0;
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const getWaterButtonText = (plant) => {
+    if (wateringPlantId === plant._id) return "Updating...";
+    if (canWaterPlant(plant)) return "Water Now";
+    return "Watered";
   };
 
   const handleAddPlant = async (e) => {
@@ -179,7 +181,9 @@ export default function Dashboard() {
     }
   };
 
-  const handleWaterPlant = async (plantId) => {
+  const handleWaterPlant = async (plant) => {
+    if (!canWaterPlant(plant)) return;
+
     const storedToken = getStoredToken();
 
     if (!storedToken) {
@@ -188,11 +192,11 @@ export default function Dashboard() {
     }
 
     clearMessages();
-    setWateringPlantId(plantId);
+    setWateringPlantId(plant._id);
 
     try {
       const res = await api.post(
-        `/user-plants/${plantId}/water`,
+        `/user-plants/${plant._id}/water`,
         {},
         {
           headers: {
@@ -225,8 +229,8 @@ export default function Dashboard() {
   return (
     <div className="dashboard-page">
       <div className="dashboard-container">
-        <section className="dashboard-hero">
-          <div className="dashboard-hero-main">
+        <section className="dashboard-hero simple-hero">
+          <div className="dashboard-hero-main hero-full">
             <p className="dashboard-subtitle">Plant Overview</p>
 
             <h1 className="dashboard-heading">
@@ -234,30 +238,15 @@ export default function Dashboard() {
             </h1>
 
             <p className="dashboard-text">
-              Track your plants, check which ones need care today, and manage
-              your collection with a calm, clear overview.
+              Track your plants, see what needs watering today, and manage your
+              collection in one clean space.
             </p>
 
             <div className="dashboard-chip-row">
               <span className="dashboard-chip">Plant collection</span>
               <span className="dashboard-chip">Water reminders</span>
-              <span className="dashboard-chip">Daily care</span>
+              <span className="dashboard-chip">Care tracking</span>
             </div>
-          </div>
-
-          <div className="dashboard-user-card">
-            <p className="dashboard-user-label">Your Profile</p>
-            <h3 className="dashboard-user-name">
-              {user?.name || "Plant Parent"}
-            </h3>
-            <p className="dashboard-user-email">{user?.email}</p>
-            <p className="dashboard-user-status">
-              <strong>Status:</strong> Logged in
-            </p>
-
-            <button className="dashboard-logout" onClick={handleLogout}>
-              Logout
-            </button>
           </div>
         </section>
 
@@ -268,25 +257,25 @@ export default function Dashboard() {
           <div className="stat-card">
             <h3>Total Plants</h3>
             <p>{stats.totalPlants}</p>
-            <span>Your personal collection</span>
+            <span>Your plant collection</span>
           </div>
 
           <div className="stat-card">
             <h3>Need Water Today</h3>
             <p>{stats.dueToday}</p>
-            <span>Plants needing attention now</span>
+            <span>Needs care now</span>
           </div>
 
           <div className="stat-card">
             <h3>Healthy / Upcoming</h3>
             <p>{stats.healthyPlants}</p>
-            <span>Plants with time left</span>
+            <span>Still in cooldown</span>
           </div>
 
           <div className="stat-card">
             <h3>Watered Before</h3>
             <p>{stats.recentlyWatered}</p>
-            <span>Plants with watering history</span>
+            <span>Has watering history</span>
           </div>
         </section>
 
@@ -347,9 +336,25 @@ export default function Dashboard() {
               <div className="attention-list">
                 {duePlants.slice(0, 4).map((plant) => (
                   <div className="attention-item" key={plant._id}>
-                    <h4>{plant.nickname}</h4>
-                    <p>{plant.plant?.name || "Unknown Plant"}</p>
-                    <span>Water today</span>
+                    <div className="attention-top">
+                      <div>
+                        <h4>{plant.nickname}</h4>
+                        <p>{plant.plant?.name || "Unknown Plant"}</p>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={`water-action-btn ${
+                          canWaterPlant(plant) ? "active" : "inactive"
+                        }`}
+                        onClick={() => handleWaterPlant(plant)}
+                        disabled={
+                          wateringPlantId === plant._id || !canWaterPlant(plant)
+                        }
+                      >
+                        {getWaterButtonText(plant)}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -360,7 +365,7 @@ export default function Dashboard() {
         <section className="dashboard-recent">
           <div className="dashboard-panel">
             <div className="panel-header">
-              <h2>Your Recent Plants</h2>
+              <h2>Your Plants</h2>
               <span>{userPlants.length}</span>
             </div>
 
@@ -372,7 +377,7 @@ export default function Dashboard() {
               </p>
             ) : (
               <div className="recent-plants-grid">
-                {userPlants.slice(0, 6).map((plant) => (
+                {userPlants.map((plant) => (
                   <div className="recent-plant-card" key={plant._id}>
                     <div className="recent-plant-top">
                       <h3>{plant.nickname}</h3>
@@ -394,17 +399,23 @@ export default function Dashboard() {
                         <strong>Sunlight:</strong>{" "}
                         {plant.plant?.sunlight || "Not specified"}
                       </p>
+                      <p>
+                        <strong>Frequency:</strong>{" "}
+                        {plant.plant?.waterFrequency || "Not set"} days
+                      </p>
                     </div>
 
                     <button
-                      className="dashboard-primary-btn"
-                      style={{ marginTop: "16px" }}
-                      onClick={() => handleWaterPlant(plant._id)}
-                      disabled={wateringPlantId === plant._id}
+                      type="button"
+                      className={`dashboard-primary-btn card-water-btn ${
+                        canWaterPlant(plant) ? "" : "button-watered"
+                      }`}
+                      onClick={() => handleWaterPlant(plant)}
+                      disabled={
+                        wateringPlantId === plant._id || !canWaterPlant(plant)
+                      }
                     >
-                      {wateringPlantId === plant._id
-                        ? "Updating..."
-                        : "Mark Watered"}
+                      {getWaterButtonText(plant)}
                     </button>
                   </div>
                 ))}
