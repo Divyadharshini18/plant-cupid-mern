@@ -470,16 +470,18 @@
 
 }
 
-/* Dashboard */
+/* Dashaboard */
 
 .dashboard-page {
   min-height: 100vh;
   padding: 28px 0 70px;
-  background:
-    radial-gradient(circle at top left, rgba(211, 150, 140, 0.16), transparent 28%),
-    radial-gradient(circle at top right, rgba(16, 86, 102, 0.10), transparent 24%),
-    linear-gradient(to bottom, #F7F4D5 0%, #f2ecd0 52%, #ece2c2 100%);
-  color: #0A3323;
+  background:linear-gradient(
+  to bottom,
+  #0A3323 0%,
+  #105666 50%,
+  #839958 100%
+  );
+  color: black;
 }
 
 .dashboard-container {
@@ -494,8 +496,8 @@
   justify-content: center;
   font-size: 1.08rem;
   font-weight: 600;
-  color: #0A3323;
-  background: linear-gradient(to bottom, #F7F4D5 0%, #f3edd3 100%);
+  color: #F7F4D5;
+  background: #0A3323;
 }
 
 .dashboard-hero {
@@ -511,14 +513,10 @@
 }
 
 .dashboard-hero-main {
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(16, 86, 102, 0.08);
+  background: #F7F4D5;
   border-radius: 30px;
   padding: 34px;
-  box-shadow:
-    0 14px 34px rgba(10, 51, 35, 0.08),
-    0 2px 10px rgba(10, 51, 35, 0.04);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
 .dashboard-subtitle {
@@ -557,7 +555,7 @@
 
 .dashboard-chip {
   padding: 8px 12px;
-  background: rgba(16, 86, 102, 0.08);
+  background: #e7dfc0;
   color: #105666;
   border-radius: 999px;
   font-size: 0.85rem;
@@ -573,15 +571,15 @@
 }
 
 .dashboard-message.success {
-  background: #edf7ef;
+  background: #dcead9;
   color: #1d5f33;
-  border: 1px solid #cfe8d4;
+  border: 1px solid #bfd7ba;
 }
 
 .dashboard-message.error {
-  background: #fff1ef;
-  color: #a3473b;
-  border: 1px solid #f1c8c1;
+  background: #f7dedd;
+  color: #943d34;
+  border: 1px solid #e4b8b2;
 }
 
 .dashboard-stats {
@@ -592,17 +590,13 @@
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(12px);
+  background: #F7F4D5;
   padding: 24px 22px;
   border-radius: 24px;
-  box-shadow:
-    0 12px 28px rgba(10, 51, 35, 0.08),
-    0 2px 8px rgba(10, 51, 35, 0.04);
-  border: 1px solid rgba(16, 86, 102, 0.08);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .stat-card::before {
@@ -614,10 +608,8 @@
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow:
-    0 18px 35px rgba(10, 51, 35, 0.12),
-    0 4px 10px rgba(10, 51, 35, 0.05);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.2);
 }
 
 .stat-card h3 {
@@ -643,14 +635,10 @@
 .dashboard-panel {
   width: 100%;
   margin: 0;
-  background: rgba(255, 255, 255, 0.84);
-  backdrop-filter: blur(10px);
+  background: #F7F4D5;
   padding: 24px;
   border-radius: 28px;
-  box-shadow:
-    0 12px 28px rgba(10, 51, 35, 0.08),
-    0 2px 8px rgba(10, 51, 35, 0.04);
-  border: 1px solid rgba(16, 86, 102, 0.08);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
 }
 
 .panel-header {
@@ -667,13 +655,12 @@
 }
 
 .panel-header span {
-  background: #eef4eb;
+  background: #e7dfc0;
   color: #105666;
   padding: 7px 14px;
   border-radius: 999px;
   font-size: 0.88rem;
   font-weight: 700;
-  border: 1px solid rgba(16, 86, 102, 0.10);
 }
 
 .panel-empty {
@@ -703,9 +690,9 @@
 .dashboard-input {
   width: 100%;
   padding: 14px 16px;
-  border: 1px solid #ddd5b8;
+  border: 1px solid #d8cfad;
   border-radius: 16px;
-  background: #fffdf8;
+  background: #fffaf0;
   font-size: 0.96rem;
   outline: none;
   color: #0A3323;
@@ -714,7 +701,7 @@
 
 .dashboard-input:focus {
   border-color: #105666;
-  box-shadow: 0 0 0 4px rgba(16, 86, 102, 0.10);
+  box-shadow: 0 0 0 3px rgba(16, 86, 102, 0.12);
   background: #ffffff;
 }
 
@@ -722,17 +709,18 @@
   padding: 13px 20px;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(135deg, #0A3323 0%, #105666 100%);
-  color: #F7F4D5;
+  background: #D3968C;
+  color: #0A3323;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 20px rgba(16, 86, 102, 0.18);
+  transition: all 0.25s ease;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.16);
 }
 
 .dashboard-primary-btn:hover {
+  background: #0A3323;
+  color: #F7F4D5;
   transform: translateY(-2px);
-  box-shadow: 0 14px 25px rgba(16, 86, 102, 0.24);
 }
 
 .dashboard-primary-btn:disabled {
@@ -750,15 +738,17 @@
 
 .attention-item {
   padding: 17px 18px;
-  background: linear-gradient(to right, #fff7ee, #fffdf8);
-  border: 1px solid #f0decb;
+  background: #fffaf0;
   border-radius: 20px;
-  transition: all 0.28s ease;
+  box-shadow: inset 0 0 0 1px rgba(10, 51, 35, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .attention-item:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(185, 107, 42, 0.08);
+  box-shadow:
+    inset 0 0 0 1px rgba(10, 51, 35, 0.08),
+    0 10px 18px rgba(0, 0, 0, 0.10);
 }
 
 .attention-top {
@@ -790,17 +780,19 @@
 }
 
 .water-action-btn.active {
-  background: linear-gradient(135deg, #0A3323 0%, #105666 100%);
-  color: #F7F4D5;
-  box-shadow: 0 10px 20px rgba(16, 86, 102, 0.18);
+  background: #D3968C;
+  color: #0A3323;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
 }
 
 .water-action-btn.active:hover {
+  background: #0A3323;
+  color: #F7F4D5;
   transform: translateY(-2px);
 }
 
 .water-action-btn.inactive {
-  background: #dfe7df;
+  background: #d9ddcf;
   color: #5f7169;
   cursor: not-allowed;
   box-shadow: none;
@@ -821,16 +813,16 @@
 }
 
 .recent-plant-card {
-  background: linear-gradient(to bottom, #fffef9 0%, #fffaf1 100%);
-  border: 1px solid #ece3c7;
+  background: #fffaf0;
   border-radius: 24px;
   padding: 20px;
-  transition: all 0.3s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   position: relative;
   overflow: hidden;
   min-height: 230px;
   display: flex;
   flex-direction: column;
+  box-shadow: inset 0 0 0 1px rgba(10, 51, 35, 0.08);
 }
 
 .recent-plant-card::before {
@@ -838,14 +830,14 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 4px;
-  background: linear-gradient(to right, #839958, #105666, #D3968C);
+  background: linear-gradient(to right, #0A3323, #105666, #D3968C);
 }
 
 .recent-plant-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-5px);
   box-shadow:
-    0 14px 26px rgba(10, 51, 35, 0.10),
-    0 4px 8px rgba(10, 51, 35, 0.05);
+    inset 0 0 0 1px rgba(10, 51, 35, 0.08),
+    0 14px 22px rgba(0, 0, 0, 0.14);
 }
 
 .recent-plant-top {
@@ -863,7 +855,7 @@
   font-size: 0.86rem;
   color: #105666;
   font-weight: 700;
-  background: #edf5f6;
+  background: #e7dfc0;
   padding: 6px 10px;
   border-radius: 999px;
 }
@@ -888,7 +880,7 @@
 }
 
 .button-watered {
-  background: #dfe7df !important;
+  background: #d9ddcf !important;
   color: #5f7169 !important;
   box-shadow: none !important;
   cursor: not-allowed !important;
