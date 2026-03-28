@@ -415,7 +415,7 @@
 
 .navbar{
   height: 65px;
-  width: 90%;
+  width: min(1240px, 90%);
   background-color: #D3968C;
   display: flex;
   align-items: center;
