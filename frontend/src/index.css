@@ -612,8 +612,8 @@
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 4px;
-  background: linear-gradient(to right, #0A3323, #105666, #D3968C);
+  height: 6px;
+  background: #D3968C
 }
 
 .stat-card:hover {
