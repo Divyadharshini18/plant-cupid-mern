@@ -250,9 +250,6 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {error && <div className="dashboard-message error">{error}</div>}
-        {success && <div className="dashboard-message success">{success}</div>}
-
         <section className="dashboard-stats">
           <div className="stat-card">
             <h3>Total Plants</h3>
@@ -278,6 +275,9 @@ export default function Dashboard() {
             <span>Has watering history</span>
           </div>
         </section>
+
+        {error && <div className="dashboard-message error">{error}</div>}
+        {success && <div className="dashboard-message success">{success}</div>}
 
         <section className="dashboard-grid">
           <div className="dashboard-panel">
