@@ -956,3 +956,162 @@
     width: 100%;
   }
 }
+
+/* Plants */
+
+.plants-page {
+  min-height: 100vh;
+  padding: 50px 0 70px;
+}
+
+.plants-hero {
+  margin-bottom: 30px;
+}
+
+.plants-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.plant-card {
+  background: #F7F4D5;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.plant-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.2);
+}
+
+.plant-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.plant-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.plant-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.plant-card-top h3 {
+  font-size: 1.2rem;
+  color: #0A3323;
+}
+
+.plant-badge {
+  background: #e7dfc0;
+  color: #105666;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.plant-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #45625a;
+}
+
+.plant-info strong {
+  color: #0A3323;
+}
+
+.plant-tips-box {
+  background: #fffaf0;
+  padding: 14px;
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 1px rgba(10, 51, 35, 0.08);
+}
+
+.tips-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #105666;
+}
+
+.plant-tips {
+  padding-left: 16px;
+  font-size: 0.88rem;
+  color: #5b6f68;
+  line-height: 1.5;
+}
+
+.plant-actions {
+  margin-top: 12px;
+}
+
+.plant-action-row {
+  display: flex;
+  margin-top: 8px;
+  gap: 12px;  
+}
+
+.plant-action-row button{
+  flex: 1;   
+}
+
+.edit-btn {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: none;
+  background: #e7dfc0;
+  color: #105666;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.edit-btn:hover {
+  background: #105666;
+  color: #F7F4D5;
+}
+
+.delete-btn {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: none;
+  background: #f2c7c3;
+  color: #943d34;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.delete-btn:hover {
+  background: #943d34;
+  color: #fff;
+}
+
+.plants-empty-state {
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .plants-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .plants-grid {
+    grid-template-columns: 1fr;
+  }
+}
