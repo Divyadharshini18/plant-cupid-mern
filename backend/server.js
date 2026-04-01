@@ -24,6 +24,7 @@ app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/plants", require("./routes/plantRoutes"));
 app.use("/api/user-plants", require("./routes/userPlantRoutes"));
+app.use("/api/images", require("./routes/imageRoutes"));
 
 const PORT = process.env.PORT || 5000;
 
