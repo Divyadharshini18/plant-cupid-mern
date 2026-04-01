@@ -13,11 +13,9 @@ function Plants() {
   const [editingId, setEditingId] = useState("");
   const [nickname, setNickname] = useState("");
   const [actionLoadingId, setActionLoadingId] = useState("");
+  const [images, setImages] = useState({});
 
   const getStoredToken = () => token || localStorage.getItem("token");
-
-  const getImage = (name) =>
-    `https://source.unsplash.com/600x400/?${encodeURIComponent(name)},plant`;
 
   const fetchUserPlants = async () => {
     try {
@@ -37,6 +35,7 @@ function Plants() {
       });
 
       setUserPlants(Array.isArray(res.data) ? res.data : []);
+      await fetchPlantImages(res.data);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load your plants.");
     } finally {
@@ -61,7 +60,7 @@ function Plants() {
     }
 
     const confirmed = window.confirm(
-      `Remove ${plantName || "this plant"} from your collection?`
+      `Remove ${plantName || "this plant"} from your collection?`,
     );
 
     if (!confirmed) return;
@@ -89,6 +88,24 @@ function Plants() {
     }
   };
 
+  const fetchPlantImages = async (plants) => {
+    const newImages = {};
+
+    for (let item of plants) {
+      try {
+        const res = await api.get(
+          `/images?query=${encodeURIComponent(item.plant?.name)}`,
+        );
+
+        newImages[item._id] = res.data.imageUrl;
+      } catch {
+        newImages[item._id] = "";
+      }
+    }
+
+    setImages(newImages);
+  };
+
   const handleUpdate = async (id) => {
     const storedToken = getStoredToken();
 
@@ -112,15 +129,15 @@ function Plants() {
         { nickname: nickname.trim() },
         {
           headers: { Authorization: `Bearer ${storedToken}` },
-        }
+        },
       );
 
       setUserPlants((prev) =>
         prev.map((plant) =>
           plant._id === id
             ? { ...plant, nickname: res.data.nickname || nickname.trim() }
-            : plant
-        )
+            : plant,
+        ),
       );
 
       setSuccess("Nickname updated successfully 🌱");
@@ -150,7 +167,9 @@ function Plants() {
   }
 
   if (!isAuthenticated) {
-    return <div className="plants-page">Please log in to view your plants.</div>;
+    return (
+      <div className="plants-page">Please log in to view your plants.</div>
+    );
   }
 
   return (
@@ -177,7 +196,7 @@ function Plants() {
             {userPlants.map((item) => (
               <div key={item._id} className="plant-card">
                 <img
-                  src={getImage(item.plant?.name || "plant")}
+                  src={images[item._id] || "/fallback.jpg"}
                   alt={item.plant?.name || "Plant"}
                   className="plant-img"
                 />
@@ -248,7 +267,9 @@ function Plants() {
                             className="dashboard-primary-btn"
                             disabled={actionLoadingId === item._id}
                           >
-                            {actionLoadingId === item._id ? "Saving..." : "Save"}
+                            {actionLoadingId === item._id
+                              ? "Saving..."
+                              : "Save"}
                           </button>
 
                           <button
@@ -272,12 +293,17 @@ function Plants() {
 
                         <button
                           onClick={() =>
-                            handleDelete(item._id, item.plant?.name || item.nickname)
+                            handleDelete(
+                              item._id,
+                              item.plant?.name || item.nickname,
+                            )
                           }
                           className="delete-btn"
                           disabled={actionLoadingId === item._id}
                         >
-                          {actionLoadingId === item._id ? "Deleting..." : "Delete"}
+                          {actionLoadingId === item._id
+                            ? "Deleting..."
+                            : "Delete"}
                         </button>
                       </div>
                     )}
