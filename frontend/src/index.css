@@ -968,6 +968,10 @@
   margin-bottom: 30px;
 }
 
+.plants-add-panel{
+  margin-bottom: 30px;
+}
+
 .plants-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

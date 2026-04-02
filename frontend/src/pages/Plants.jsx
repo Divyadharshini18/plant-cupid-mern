@@ -6,6 +6,7 @@ function Plants() {
   const { token, isLoading, isAuthenticated } = useAuth();
 
   const [userPlants, setUserPlants] = useState([]);
+  const [availablePlants, setAvailablePlants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -13,31 +14,63 @@ function Plants() {
   const [editingId, setEditingId] = useState("");
   const [nickname, setNickname] = useState("");
   const [actionLoadingId, setActionLoadingId] = useState("");
+
+  const [newPlantId, setNewPlantId] = useState("");
+  const [newNickname, setNewNickname] = useState("");
+  const [isAddingPlant, setIsAddingPlant] = useState(false);
+
   const [images, setImages] = useState({});
 
   const getStoredToken = () => token || localStorage.getItem("token");
 
+  const fetchPlantImages = async (plants) => {
+    const newImages = {};
+
+    for (let item of plants) {
+      try {
+        const res = await api.get(
+          `/images?query=${encodeURIComponent(item.plant?.name)}`
+        );
+        newImages[item._id] = res.data.imageUrl;
+      } catch {
+        newImages[item._id] = "";
+      }
+    }
+
+    setImages(newImages);
+  };
+
   const fetchUserPlants = async () => {
+    const storedToken = getStoredToken();
+
+    if (!storedToken) {
+      setError("Please login again.");
+      setLoading(false);
+      return;
+    }
+
+    const res = await api.get("/user-plants", {
+      headers: { Authorization: `Bearer ${storedToken}` },
+    });
+
+    const plantsData = Array.isArray(res.data) ? res.data : [];
+    setUserPlants(plantsData);
+    await fetchPlantImages(plantsData);
+  };
+
+  const fetchAvailablePlants = async () => {
+    const res = await api.get("/plants");
+    setAvailablePlants(Array.isArray(res.data) ? res.data : []);
+  };
+
+  const fetchData = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const storedToken = getStoredToken();
-
-      if (!storedToken) {
-        setError("Please login again.");
-        setLoading(false);
-        return;
-      }
-
-      const res = await api.get("/user-plants", {
-        headers: { Authorization: `Bearer ${storedToken}` },
-      });
-
-      setUserPlants(Array.isArray(res.data) ? res.data : []);
-      await fetchPlantImages(res.data);
+      await Promise.all([fetchUserPlants(), fetchAvailablePlants()]);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load your plants.");
+      setError(err.response?.data?.message || "Failed to load plants data.");
     } finally {
       setLoading(false);
     }
@@ -45,11 +78,58 @@ function Plants() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchUserPlants();
+      fetchData();
     } else if (!isLoading) {
       setLoading(false);
     }
   }, [isAuthenticated, isLoading, token]);
+
+  const handleAddPlant = async (e) => {
+    e.preventDefault();
+
+    const storedToken = getStoredToken();
+
+    if (!storedToken) {
+      setError("Please login again.");
+      return;
+    }
+
+    if (!newPlantId) {
+      setError("Please select a plant.");
+      return;
+    }
+
+    if (!newNickname.trim()) {
+      setError("Please give your plant a nickname.");
+      return;
+    }
+
+    try {
+      setIsAddingPlant(true);
+      setError("");
+      setSuccess("");
+
+      await api.post(
+        "/user-plants",
+        {
+          plantId: newPlantId,
+          nickname: newNickname.trim(),
+        },
+        {
+          headers: { Authorization: `Bearer ${storedToken}` },
+        }
+      );
+
+      setSuccess("Plant added successfully 🌱");
+      setNewPlantId("");
+      setNewNickname("");
+      await fetchData();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to add plant.");
+    } finally {
+      setIsAddingPlant(false);
+    }
+  };
 
   const handleDelete = async (id, plantName) => {
     const storedToken = getStoredToken();
@@ -60,7 +140,7 @@ function Plants() {
     }
 
     const confirmed = window.confirm(
-      `Remove ${plantName || "this plant"} from your collection?`,
+      `Remove ${plantName || "this plant"} from your collection?`
     );
 
     if (!confirmed) return;
@@ -88,24 +168,6 @@ function Plants() {
     }
   };
 
-  const fetchPlantImages = async (plants) => {
-    const newImages = {};
-
-    for (let item of plants) {
-      try {
-        const res = await api.get(
-          `/images?query=${encodeURIComponent(item.plant?.name)}`,
-        );
-
-        newImages[item._id] = res.data.imageUrl;
-      } catch {
-        newImages[item._id] = "";
-      }
-    }
-
-    setImages(newImages);
-  };
-
   const handleUpdate = async (id) => {
     const storedToken = getStoredToken();
 
@@ -129,15 +191,15 @@ function Plants() {
         { nickname: nickname.trim() },
         {
           headers: { Authorization: `Bearer ${storedToken}` },
-        },
+        }
       );
 
       setUserPlants((prev) =>
         prev.map((plant) =>
           plant._id === id
             ? { ...plant, nickname: res.data.nickname || nickname.trim() }
-            : plant,
-        ),
+            : plant
+        )
       );
 
       setSuccess("Nickname updated successfully 🌱");
@@ -179,17 +241,55 @@ function Plants() {
           <p className="dashboard-subtitle">My Plants</p>
           <h1 className="dashboard-heading">Your plant collection 🌿</h1>
           <p className="dashboard-text">
-            View your added plants, check care details, and manage nicknames.
+            View your added plants, check care details, manage nicknames, and
+            add more plants here.
           </p>
         </div>
 
         {error && <div className="dashboard-message error">{error}</div>}
         {success && <div className="dashboard-message success">{success}</div>}
 
+        <div className="dashboard-panel plants-add-panel">
+          <div className="panel-header">
+            <h2>Add Plant</h2>
+            <span>{availablePlants.length} types</span>
+          </div>
+
+          <form className="dashboard-form" onSubmit={handleAddPlant}>
+            <select
+              className="dashboard-input"
+              value={newPlantId}
+              onChange={(e) => setNewPlantId(e.target.value)}
+            >
+              <option value="">Select a plant</option>
+              {availablePlants.map((plant) => (
+                <option key={plant._id} value={plant._id}>
+                  {plant.name}
+                </option>
+              ))}
+            </select>
+
+            <input
+              value={newNickname}
+              onChange={(e) => setNewNickname(e.target.value)}
+              className="dashboard-input"
+              placeholder="Enter nickname"
+            />
+
+            <button
+              type="submit"
+              className="dashboard-primary-btn"
+              disabled={isAddingPlant}
+            >
+              {isAddingPlant ? "Adding..." : "Add Plant"}
+            </button>
+          </form>
+        </div>
+
         {userPlants.length === 0 ? (
           <div className="dashboard-panel plants-empty-state">
             <h2>No plants added yet</h2>
-            <p>Add a plant from your dashboard to see it here.</p>
+            <p>Add a plant above to start your collection.</p>
           </div>
         ) : (
           <div className="plants-grid">
@@ -265,9 +365,7 @@ function Plants() {
                             className="dashboard-primary-btn"
                             disabled={actionLoadingId === item._id}
                           >
-                            {actionLoadingId === item._id
-                              ? "Saving..."
-                              : "Save"}
+                            {actionLoadingId === item._id ? "Saving..." : "Save"}
                           </button>
 
                           <button
@@ -293,7 +391,7 @@ function Plants() {
                           onClick={() =>
                             handleDelete(
                               item._id,
-                              item.plant?.name || item.nickname,
+                              item.plant?.name || item.nickname
                             )
                           }
                           className="delete-btn"
