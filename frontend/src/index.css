@@ -995,6 +995,17 @@
   object-fit: cover;
 }
 
+.plant-nickname-main{
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.plant-type{
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
 .plant-body {
   padding: 20px;
   display: flex;

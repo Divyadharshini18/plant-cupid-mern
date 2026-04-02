@@ -204,10 +204,8 @@ function Plants() {
                 <div className="plant-body">
                   <div className="plant-card-top">
                     <div>
-                      <h3>{item.plant?.name}</h3>
-                      <p className="plant-nickname">
-                        Nickname: <strong>{item.nickname}</strong>
-                      </p>
+                      <h3 className="plant-nickname-main">{item.nickname}</h3>
+                      <p className="plant-type">{item.plant?.name}</p>
                     </div>
 
                     <span className="plant-badge">
