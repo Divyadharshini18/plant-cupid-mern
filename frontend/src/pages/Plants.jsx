@@ -5,8 +5,39 @@ import { useAuth } from "../context/AuthContext";
 function Plants() {
   const { token, isLoading, isAuthenticated } = useAuth();
 
-  const [userPlants, setUserPlants] = useState([]);
-  const [availablePlants, setAvailablePlants] = useState([]);
+  const USER_PLANTS_CACHE_KEY = "plant_cupid_user_plants";
+  const AVAILABLE_PLANTS_CACHE_KEY = "plant_cupid_available_plants";
+  const PLANT_IMAGES_CACHE_KEY = "plant_cupid_plant_images";
+
+  const readCache = (key, fallback) => {
+    try {
+      const raw = sessionStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const writeCache = (key, value) => {
+    try {
+      sessionStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // ignore cache errors
+    }
+  };
+
+  const [userPlants, setUserPlants] = useState(() =>
+    readCache(USER_PLANTS_CACHE_KEY, []),
+  );
+
+  const [availablePlants, setAvailablePlants] = useState(() =>
+    readCache(AVAILABLE_PLANTS_CACHE_KEY, []),
+  );
+
+  const [images, setImages] = useState(() =>
+    readCache(PLANT_IMAGES_CACHE_KEY, {}),
+  );
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -19,25 +50,31 @@ function Plants() {
   const [newNickname, setNewNickname] = useState("");
   const [isAddingPlant, setIsAddingPlant] = useState(false);
 
-  const [images, setImages] = useState({});
-
   const getStoredToken = () => token || localStorage.getItem("token");
 
   const fetchPlantImages = async (plants) => {
-    const newImages = {};
+    const updatedImages = { ...images };
 
-    for (let item of plants) {
+    for (const item of plants) {
+      const imageKey = item.plant?.name?.toLowerCase();
+
+      if (!imageKey) continue;
+
+      if (updatedImages[imageKey]) continue;
+
       try {
         const res = await api.get(
-          `/images?query=${encodeURIComponent(item.plant?.name)}`
+          `/images?query=${encodeURIComponent(item.plant.name)}`,
         );
-        newImages[item._id] = res.data.imageUrl;
+
+        updatedImages[imageKey] = res.data.imageUrl || "";
       } catch {
-        newImages[item._id] = "";
+        updatedImages[imageKey] = "";
       }
     }
 
-    setImages(newImages);
+    setImages(updatedImages);
+    writeCache(PLANT_IMAGES_CACHE_KEY, updatedImages);
   };
 
   const fetchUserPlants = async () => {
@@ -55,12 +92,16 @@ function Plants() {
 
     const plantsData = Array.isArray(res.data) ? res.data : [];
     setUserPlants(plantsData);
+    writeCache(USER_PLANTS_CACHE_KEY, plantsData);
+
     await fetchPlantImages(plantsData);
   };
 
   const fetchAvailablePlants = async () => {
     const res = await api.get("/plants");
-    setAvailablePlants(Array.isArray(res.data) ? res.data : []);
+    const plantsData = Array.isArray(res.data) ? res.data : [];
+    setAvailablePlants(plantsData);
+    writeCache(AVAILABLE_PLANTS_CACHE_KEY, plantsData);
   };
 
   const fetchData = async () => {
@@ -77,11 +118,34 @@ function Plants() {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchData();
-    } else if (!isLoading) {
+    if (!isAuthenticated && !isLoading) {
       setLoading(false);
+      return;
     }
+
+    if (!isAuthenticated) return;
+
+    const loadPlantsPage = async () => {
+      try {
+        setLoading(userPlants.length === 0);
+
+        setError("");
+
+        if (userPlants.length === 0) {
+          await fetchUserPlants();
+        }
+
+        if (availablePlants.length === 0) {
+          await fetchAvailablePlants();
+        }
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to load plants data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPlantsPage();
   }, [isAuthenticated, isLoading, token]);
 
   const handleAddPlant = async (e) => {
@@ -109,7 +173,7 @@ function Plants() {
       setError("");
       setSuccess("");
 
-      await api.post(
+      const res = await api.post(
         "/user-plants",
         {
           plantId: newPlantId,
@@ -117,13 +181,30 @@ function Plants() {
         },
         {
           headers: { Authorization: `Bearer ${storedToken}` },
-        }
+        },
       );
+
+      const selectedPlant = availablePlants.find((p) => p._id === newPlantId);
+
+      const newUserPlant = {
+        _id: res.data._id,
+        nickname: newNickname.trim(),
+        plant: selectedPlant || null,
+        reminder: { nextWaterDate: new Date().toISOString(), daysLeft: 0 },
+        wateredHistory: [],
+      };
+
+      const updatedPlants = [newUserPlant, ...userPlants];
+      setUserPlants(updatedPlants);
+      writeCache(USER_PLANTS_CACHE_KEY, updatedPlants);
+
+      if (selectedPlant?.name) {
+        await fetchPlantImages([newUserPlant]);
+      }
 
       setSuccess("Plant added successfully 🌱");
       setNewPlantId("");
       setNewNickname("");
-      await fetchData();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add plant.");
     } finally {
@@ -140,7 +221,7 @@ function Plants() {
     }
 
     const confirmed = window.confirm(
-      `Remove ${plantName || "this plant"} from your collection?`
+      `Remove ${plantName || "this plant"} from your collection?`,
     );
 
     if (!confirmed) return;
@@ -155,7 +236,11 @@ function Plants() {
       });
 
       setSuccess("Plant removed successfully 🪴");
-      setUserPlants((prev) => prev.filter((plant) => plant._id !== id));
+      setUserPlants((prev) => {
+        const updated = prev.filter((plant) => plant._id !== id);
+        writeCache(USER_PLANTS_CACHE_KEY, updated);
+        return updated;
+      });
 
       if (editingId === id) {
         setEditingId("");
@@ -191,16 +276,19 @@ function Plants() {
         { nickname: nickname.trim() },
         {
           headers: { Authorization: `Bearer ${storedToken}` },
-        }
+        },
       );
 
-      setUserPlants((prev) =>
-        prev.map((plant) =>
+      setUserPlants((prev) => {
+        const updated = prev.map((plant) =>
           plant._id === id
             ? { ...plant, nickname: res.data.nickname || nickname.trim() }
-            : plant
-        )
-      );
+            : plant,
+        );
+
+        writeCache(USER_PLANTS_CACHE_KEY, updated);
+        return updated;
+      });
 
       setSuccess("Nickname updated successfully 🌱");
       setEditingId("");
@@ -296,7 +384,9 @@ function Plants() {
             {userPlants.map((item) => (
               <div key={item._id} className="plant-card">
                 <img
-                  src={images[item._id] || "/fallback.jpg"}
+                  src={
+                    images[item.plant?.name?.toLowerCase()] || "/fallback.jpg"
+                  }
                   alt={item.plant?.name || "Plant"}
                   className="plant-img"
                 />
@@ -365,7 +455,9 @@ function Plants() {
                             className="dashboard-primary-btn"
                             disabled={actionLoadingId === item._id}
                           >
-                            {actionLoadingId === item._id ? "Saving..." : "Save"}
+                            {actionLoadingId === item._id
+                              ? "Saving..."
+                              : "Save"}
                           </button>
 
                           <button
@@ -391,7 +483,7 @@ function Plants() {
                           onClick={() =>
                             handleDelete(
                               item._id,
-                              item.plant?.name || item.nickname
+                              item.plant?.name || item.nickname,
                             )
                           }
                           className="delete-btn"
