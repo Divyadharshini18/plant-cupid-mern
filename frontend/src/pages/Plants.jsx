@@ -313,7 +313,14 @@ function Plants() {
   };
 
   if (isLoading || loading) {
-    return <div className="plants-page">Loading your plants...</div>;
+    return (
+      <div className="loader-wrapper">
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p className="loader-text">Loading your plants...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
