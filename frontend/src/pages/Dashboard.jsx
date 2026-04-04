@@ -10,7 +10,8 @@ export default function Dashboard() {
 
   const [userPlants, setUserPlants] = useState([]);
   const [availablePlants, setAvailablePlants] = useState([]);
-  const [plantsUnavailableMessage, setPlantsUnavailableMessage] = useState(null);
+  const [plantsUnavailableMessage, setPlantsUnavailableMessage] =
+    useState(null);
 
   const [newPlantId, setNewPlantId] = useState("");
   const [newNickname, setNewNickname] = useState("");
@@ -104,12 +105,12 @@ export default function Dashboard() {
     const healthyPlants = userPlants.filter(
       (plant) =>
         typeof plant?.reminder?.daysLeft === "number" &&
-        plant.reminder.daysLeft > 0
+        plant.reminder.daysLeft > 0,
     ).length;
 
     const recentlyWatered = userPlants.filter(
       (plant) =>
-        Array.isArray(plant.wateredHistory) && plant.wateredHistory.length > 0
+        Array.isArray(plant.wateredHistory) && plant.wateredHistory.length > 0,
     ).length;
 
     return { totalPlants, dueToday, healthyPlants, recentlyWatered };
@@ -161,7 +162,7 @@ export default function Dashboard() {
           headers: {
             Authorization: `Bearer ${storedToken}`,
           },
-        }
+        },
       );
 
       setError(null);
@@ -202,7 +203,7 @@ export default function Dashboard() {
           headers: {
             Authorization: `Bearer ${storedToken}`,
           },
-        }
+        },
       );
 
       setSuccess(res.data?.message || "Plant watered successfully 💧");
@@ -219,7 +220,14 @@ export default function Dashboard() {
   };
 
   if (isLoading) {
-    return <p className="dashboard-loading">Loading dashboard...</p>;
+    return (
+      <div className="loader-wrapper">
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p className="loader-text">Loading dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
