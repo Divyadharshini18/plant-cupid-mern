@@ -483,6 +483,44 @@
 
 }
 
+/* Loader */
+
+.loader-wrapper{
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader{
+  width: 50px;
+  height: 50px;
+  border: 5px solid #F7F4D5;
+  border-top: 5px solid #105666;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loader-text{
+  margin-top: 14px;
+  text-align: center;
+  color: #F7F4D5;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+}
+
+.loader-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes spin{
+  0%{ transform: rotate(0deg); }
+  100%{ transform: rotate(360deg); }
+}
+
 /* Dashaboard */
 
 .dashboard-page {
