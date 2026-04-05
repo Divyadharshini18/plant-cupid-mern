@@ -1164,3 +1164,40 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* PROFILE */
+
+.profile-page{
+  padding: 40px 0 70px;
+}
+
+.profile-hero{
+  margin-bottom: 30px;
+}
+
+.history-list{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-item{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: #fffaf0;
+  padding: 14px 18px;
+  border-radius: 18px;
+
+  box-shadow: inset 0 0 0 1px rgba(10,51,35,0.08);
+}
+
+.history-item h4{
+  color:#0A3323;
+}
+
+.history-item p{
+  color:#5b6f68;
+  font-size:0.9rem;
+}
