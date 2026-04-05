@@ -48,11 +48,11 @@ function Profile() {
       nickname: plant.nickname,
       plantName: plant.plant?.name,
       date: entry.date,
-    }))
+    })),
   );
 
   const sortedLogs = waterLogs.sort(
-    (a, b) => new Date(b.date) - new Date(a.date)
+    (a, b) => new Date(b.date) - new Date(a.date),
   );
 
   if (loading) {
@@ -70,13 +70,14 @@ function Profile() {
     <div className="profile-page">
       <div className="dashboard-container">
 
-        {/* USER INFO */}
         <div className="dashboard-hero-main profile-hero">
           <h1 className="dashboard-heading">{user?.name}</h1>
           <p className="dashboard-text">{user?.email}</p>
+          <p className="profile-subtext">
+            You have {userPlants.length} plants in your care 🌱
+          </p>
         </div>
 
-        {/* WATER HISTORY */}
         <div className="dashboard-panel">
           <div className="panel-header">
             <h2>Watering History</h2>
@@ -94,15 +95,12 @@ function Profile() {
                     <p>{log.plantName}</p>
                   </div>
 
-                  <span>
-                    {new Date(log.date).toLocaleDateString()}
-                  </span>
+                  <span>{new Date(log.date).toLocaleDateString()}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
