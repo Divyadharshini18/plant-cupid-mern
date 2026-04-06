@@ -392,7 +392,7 @@ function Plants() {
               <div key={item._id} className="plant-card">
                 <img
                   src={
-                    images[item.plant?.name?.toLowerCase()] || "/fallback.jpg"
+                    images[item.plant?.name?.toLowerCase()] || "/fallback.png"
                   }
                   alt={item.plant?.name || "Plant"}
                   className="plant-img"
