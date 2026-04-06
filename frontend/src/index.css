@@ -1175,6 +1175,12 @@
   margin-bottom: 30px;
 }
 
+.profile-subtext{
+  margin-top: 8px;
+  color: #5b6f68;
+  font-size: 0.95rem;
+}
+
 .history-list{
   display: flex;
   flex-direction: column;
