@@ -1207,3 +1207,49 @@
   color:#5b6f68;
   font-size:0.9rem;
 }
+
+.about-page{
+  padding: 40px 0 70px;
+}
+
+.about-hero{
+  margin-bottom: 30px;
+}
+
+.about-section{
+  margin-bottom: 22px;
+}
+
+.about-text{
+  color: #45625a;
+  line-height: 1.6;
+}
+
+.about-list{
+  list-style: none;
+  padding-left: 0;
+  color: #45625a;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.about-list li{
+  position: relative;
+  padding-left: 24px;
+}
+
+.about-list li::before{
+  content: "❀";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #D3968C;
+  font-size: 14px;
+}
+
+.about-contact{
+  margin-top: 10px;
+  color: #0A3323;
+  font-weight: 500;
+}
