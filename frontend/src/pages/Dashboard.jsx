@@ -84,11 +84,11 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchUserPlants();
-      fetchAvailablePlants();
-    }
-  }, [token, isAuthenticated]);
+    if (!isAuthenticated) return;
+
+    fetchUserPlants();
+    fetchAvailablePlants();
+  }, [isAuthenticated, token]);
 
   const duePlants = useMemo(() => {
     return userPlants.filter((plant) => plant?.reminder?.daysLeft === 0);
