@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import api from "../api/api";
+import {
+  getAvailablePlants,
+  getUserPlants,
+  addUserPlant,
+  waterUserPlant,
+} from "../services/plantService";
+import { clearProfileCache } from "../services/cache";
 
 export default function Dashboard() {
   const { user, token, isAuthenticated, isLoading } = useAuth();
@@ -39,7 +45,7 @@ export default function Dashboard() {
     });
   };
 
-  const fetchUserPlants = async () => {
+  const fetchUserPlants = async (force = false) => {
     setIsFetchingPlants(true);
 
     try {
@@ -50,31 +56,22 @@ export default function Dashboard() {
         return;
       }
 
-      const res = await api.get("/user-plants", {
-        headers: {
-          Authorization: `Bearer ${storedToken}`,
-        },
-      });
-
-      setUserPlants(Array.isArray(res.data) ? res.data : []);
+      const plants = await getUserPlants(storedToken, { force });
+      setUserPlants(plants);
       setError(null);
     } catch (err) {
-      if ([401, 403].includes(err.response?.status)) {
-        setError("Session expired. Please log in again.");
-      } else {
-        setError("Unable to load your plants.");
-      }
+      setError(err.response?.data?.message || "Unable to load your plants.");
     } finally {
       setIsFetchingPlants(false);
     }
   };
 
-  const fetchAvailablePlants = async () => {
+  const fetchAvailablePlants = async (force = false) => {
     try {
-      const res = await api.get("/plants");
+      const plants = await getAvailablePlants({ force });
 
-      if (Array.isArray(res.data) && res.data.length > 0) {
-        setAvailablePlants(res.data);
+      if (Array.isArray(plants) && plants.length > 0) {
+        setAvailablePlants(plants);
         setPlantsUnavailableMessage(null);
       } else {
         setAvailablePlants([]);
@@ -152,31 +149,21 @@ export default function Dashboard() {
     setIsAddingPlant(true);
 
     try {
-      await api.post(
-        "/user-plants",
-        {
-          plantId: newPlantId,
-          nickname: newNickname.trim(),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${storedToken}`,
-          },
-        },
-      );
+      await addUserPlant(storedToken, {
+        plantId: newPlantId,
+        nickname: newNickname.trim(),
+      });
 
+      clearProfileCache();
       setError(null);
       setSuccess("Plant added successfully 🌱");
       setNewPlantId("");
       setNewNickname("");
 
-      await fetchUserPlants();
+      await fetchUserPlants(true);
+      await fetchAvailablePlants();
     } catch (err) {
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Failed to add plant.");
-      }
+      setError(err.response?.data?.message || "Failed to add plant.");
     } finally {
       setIsAddingPlant(false);
     }
@@ -196,24 +183,15 @@ export default function Dashboard() {
     setWateringPlantId(plant._id);
 
     try {
-      const res = await api.post(
-        `/user-plants/${plant._id}/water`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${storedToken}`,
-          },
-        },
-      );
+      const res = await waterUserPlant(storedToken, plant._id);
 
-      setSuccess(res.data?.message || "Plant watered successfully 💧");
-      await fetchUserPlants();
+      clearProfileCache();
+      setSuccess(res?.message || "Plant watered successfully 💧");
+      await fetchUserPlants(true);
     } catch (err) {
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Unable to water plant right now.");
-      }
+      setError(
+        err.response?.data?.message || "Unable to water plant right now.",
+      );
     } finally {
       setWateringPlantId("");
     }
