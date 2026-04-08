@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import api from "../api/api";
+import { getProfile } from "../services/userService";
+import { getUserPlants } from "../services/plantService";
 import { useAuth } from "../context/AuthContext";
 
 function Profile() {
@@ -13,23 +14,19 @@ function Profile() {
 
   const getToken = () => token || localStorage.getItem("token");
 
-  const fetchProfileData = async () => {
+  const fetchProfileData = async (force = false) => {
     try {
       setLoading(true);
 
       const storedToken = getToken();
 
-      const [userRes, plantsRes] = await Promise.all([
-        api.get("/users/profile", {
-          headers: { Authorization: `Bearer ${storedToken}` },
-        }),
-        api.get("/user-plants", {
-          headers: { Authorization: `Bearer ${storedToken}` },
-        }),
+      const [profileData, plantsData] = await Promise.all([
+        getProfile(storedToken, { force }),
+        getUserPlants(storedToken, { force }),
       ]);
 
-      setUser(userRes.data);
-      setUserPlants(plantsRes.data);
+      setUser(profileData);
+      setUserPlants(plantsData);
     } catch {
       setError("Failed to load profile");
     } finally {
@@ -69,7 +66,6 @@ function Profile() {
   return (
     <div className="profile-page">
       <div className="dashboard-container">
-
         <div className="dashboard-hero-main profile-hero">
           <h1 className="dashboard-heading">{user?.name}</h1>
           <p className="dashboard-text">{user?.email}</p>
