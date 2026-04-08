@@ -161,7 +161,6 @@ export default function Dashboard() {
       setNewNickname("");
 
       await fetchUserPlants(true);
-      await fetchAvailablePlants();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add plant.");
     } finally {
