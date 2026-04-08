@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import api from "../api/api";
+import {
+  getAvailablePlants,
+  getUserPlants,
+  addUserPlant,
+  updateUserPlantNickname,
+  deleteUserPlant,
+  getPlantImage,
+} from "../services/plantService";
+import { clearProfileCache } from "../services/cache";
 import { useAuth } from "../context/AuthContext";
 
 function Plants() {
@@ -26,17 +34,9 @@ function Plants() {
     }
   };
 
-  const [userPlants, setUserPlants] = useState(() =>
-    readCache(USER_PLANTS_CACHE_KEY, []),
-  );
-
-  const [availablePlants, setAvailablePlants] = useState(() =>
-    readCache(AVAILABLE_PLANTS_CACHE_KEY, []),
-  );
-
-  const [images, setImages] = useState(() =>
-    readCache(PLANT_IMAGES_CACHE_KEY, {}),
-  );
+  const [userPlants, setUserPlants] = useState([]);
+  const [availablePlants, setAvailablePlants] = useState([]);
+  const [images, setImages] = useState({});
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -53,31 +53,22 @@ function Plants() {
   const getStoredToken = () => token || localStorage.getItem("token");
 
   const fetchPlantImages = async (plants) => {
-    const updatedImages = { ...images };
+    const nextImages = { ...images };
 
     for (const item of plants) {
-      const imageKey = item.plant?.name?.toLowerCase();
+      const plantName = item.plant?.name;
+      const imageKey = plantName?.toLowerCase();
 
-      if (!imageKey) continue;
+      if (!plantName || nextImages[imageKey]) continue;
 
-      if (updatedImages[imageKey]) continue;
-
-      try {
-        const res = await api.get(
-          `/images?query=${encodeURIComponent(item.plant.name)}`,
-        );
-
-        updatedImages[imageKey] = res.data.imageUrl || "";
-      } catch {
-        updatedImages[imageKey] = "";
-      }
+      const imageUrl = await getPlantImage(plantName);
+      nextImages[imageKey] = imageUrl;
     }
 
-    setImages(updatedImages);
-    writeCache(PLANT_IMAGES_CACHE_KEY, updatedImages);
+    setImages(nextImages);
   };
 
-  const fetchUserPlants = async () => {
+  const fetchUserPlantsData = async (force = false) => {
     const storedToken = getStoredToken();
 
     if (!storedToken) {
@@ -86,22 +77,14 @@ function Plants() {
       return;
     }
 
-    const res = await api.get("/user-plants", {
-      headers: { Authorization: `Bearer ${storedToken}` },
-    });
-
-    const plantsData = Array.isArray(res.data) ? res.data : [];
+    const plantsData = await getUserPlants(storedToken, { force });
     setUserPlants(plantsData);
-    writeCache(USER_PLANTS_CACHE_KEY, plantsData);
-
     await fetchPlantImages(plantsData);
   };
 
-  const fetchAvailablePlants = async () => {
-    const res = await api.get("/plants");
-    const plantsData = Array.isArray(res.data) ? res.data : [];
+  const fetchAvailablePlantsData = async (force = false) => {
+    const plantsData = await getAvailablePlants({ force });
     setAvailablePlants(plantsData);
-    writeCache(AVAILABLE_PLANTS_CACHE_KEY, plantsData);
   };
 
   const fetchData = async () => {
@@ -127,17 +110,17 @@ function Plants() {
 
     const loadPlantsPage = async () => {
       try {
-        setLoading(userPlants.length === 0);
-
+        setLoading(true);
         setError("");
 
-        if (userPlants.length === 0) {
-          await fetchUserPlants();
-        }
+        const [plantsData, availableData] = await Promise.all([
+          getUserPlants(getStoredToken()),
+          getAvailablePlants(),
+        ]);
 
-        if (availablePlants.length === 0) {
-          await fetchAvailablePlants();
-        }
+        setUserPlants(plantsData);
+        setAvailablePlants(availableData);
+        await fetchPlantImages(plantsData);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load plants data.");
       } finally {
@@ -173,35 +156,32 @@ function Plants() {
       setError("");
       setSuccess("");
 
-      const res = await api.post(
-        "/user-plants",
-        {
-          plantId: newPlantId,
-          nickname: newNickname.trim(),
-        },
-        {
-          headers: { Authorization: `Bearer ${storedToken}` },
-        },
-      );
+      const created = await addUserPlant(storedToken, {
+        plantId: newPlantId,
+        nickname: newNickname.trim(),
+      });
 
       const selectedPlant = availablePlants.find((p) => p._id === newPlantId);
 
       const newUserPlant = {
-        _id: res.data._id,
+        _id: created._id,
         nickname: newNickname.trim(),
         plant: selectedPlant || null,
         reminder: { nextWaterDate: new Date().toISOString(), daysLeft: 0 },
         wateredHistory: [],
       };
 
-      const updatedPlants = [newUserPlant, ...userPlants];
-      setUserPlants(updatedPlants);
-      writeCache(USER_PLANTS_CACHE_KEY, updatedPlants);
+      setUserPlants((prev) => [newUserPlant, ...prev]);
 
       if (selectedPlant?.name) {
-        await fetchPlantImages([newUserPlant]);
+        const imageUrl = await getPlantImage(selectedPlant.name);
+        setImages((prev) => ({
+          ...prev,
+          [selectedPlant.name.toLowerCase()]: imageUrl,
+        }));
       }
 
+      clearProfileCache();
       setSuccess("Plant added successfully 🌱");
       setNewPlantId("");
       setNewNickname("");
@@ -231,16 +211,12 @@ function Plants() {
       setError("");
       setSuccess("");
 
-      await api.delete(`/user-plants/${id}`, {
-        headers: { Authorization: `Bearer ${storedToken}` },
-      });
+      await deleteUserPlant(storedToken, id);
 
       setSuccess("Plant removed successfully 🪴");
-      setUserPlants((prev) => {
-        const updated = prev.filter((plant) => plant._id !== id);
-        writeCache(USER_PLANTS_CACHE_KEY, updated);
-        return updated;
-      });
+      setUserPlants((prev) => prev.filter((plant) => plant._id !== id));
+
+      clearProfileCache();
 
       if (editingId === id) {
         setEditingId("");
@@ -271,25 +247,21 @@ function Plants() {
       setError("");
       setSuccess("");
 
-      const res = await api.patch(
-        `/user-plants/${id}`,
-        { nickname: nickname.trim() },
-        {
-          headers: { Authorization: `Bearer ${storedToken}` },
-        },
+      const updatedPlant = await updateUserPlantNickname(
+        storedToken,
+        id,
+        nickname.trim(),
       );
 
-      setUserPlants((prev) => {
-        const updated = prev.map((plant) =>
+      setUserPlants((prev) =>
+        prev.map((plant) =>
           plant._id === id
-            ? { ...plant, nickname: res.data.nickname || nickname.trim() }
+            ? { ...plant, nickname: updatedPlant.nickname || nickname.trim() }
             : plant,
-        );
+        ),
+      );
 
-        writeCache(USER_PLANTS_CACHE_KEY, updated);
-        return updated;
-      });
-
+      clearProfileCache();
       setSuccess("Nickname updated successfully 🌱");
       setEditingId("");
       setNickname("");
