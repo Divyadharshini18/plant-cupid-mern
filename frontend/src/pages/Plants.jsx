@@ -12,28 +12,6 @@ import { useAuth } from "../context/AuthContext";
 
 function Plants() {
   const { token, isLoading, isAuthenticated } = useAuth();
-
-  const USER_PLANTS_CACHE_KEY = "plant_cupid_user_plants";
-  const AVAILABLE_PLANTS_CACHE_KEY = "plant_cupid_available_plants";
-  const PLANT_IMAGES_CACHE_KEY = "plant_cupid_plant_images";
-
-  const readCache = (key, fallback) => {
-    try {
-      const raw = sessionStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
-  };
-
-  const writeCache = (key, value) => {
-    try {
-      sessionStorage.setItem(key, JSON.stringify(value));
-    } catch {
-      // ignore cache errors
-    }
-  };
-
   const [userPlants, setUserPlants] = useState([]);
   const [availablePlants, setAvailablePlants] = useState([]);
   const [images, setImages] = useState({});
@@ -68,38 +46,6 @@ function Plants() {
     setImages(nextImages);
   };
 
-  const fetchUserPlantsData = async (force = false) => {
-    const storedToken = getStoredToken();
-
-    if (!storedToken) {
-      setError("Please login again.");
-      setLoading(false);
-      return;
-    }
-
-    const plantsData = await getUserPlants(storedToken, { force });
-    setUserPlants(plantsData);
-    await fetchPlantImages(plantsData);
-  };
-
-  const fetchAvailablePlantsData = async (force = false) => {
-    const plantsData = await getAvailablePlants({ force });
-    setAvailablePlants(plantsData);
-  };
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      await Promise.all([fetchUserPlants(), fetchAvailablePlants()]);
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load plants data.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
       setLoading(false);
@@ -112,9 +58,10 @@ function Plants() {
       try {
         setLoading(true);
         setError("");
+        const storedToken = getStoredToken();
 
         const [plantsData, availableData] = await Promise.all([
-          getUserPlants(getStoredToken()),
+          getUserPlants(storedToken),
           getAvailablePlants(),
         ]);
 
