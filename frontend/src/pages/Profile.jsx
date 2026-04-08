@@ -17,6 +17,7 @@ function Profile() {
   const fetchProfileData = async (force = false) => {
     try {
       setLoading(true);
+      setError("");
 
       const storedToken = getToken();
 
@@ -48,7 +49,7 @@ function Profile() {
     })),
   );
 
-  const sortedLogs = waterLogs.sort(
+  const sortedLogs = [...waterLogs].sort(
     (a, b) => new Date(b.date) - new Date(a.date),
   );
 
@@ -73,6 +74,8 @@ function Profile() {
             You have {userPlants.length} plants in your care 🌱
           </p>
         </div>
+        
+        {error && <div className="dashboard-message error">{error}</div>}
 
         <div className="dashboard-panel">
           <div className="panel-header">
