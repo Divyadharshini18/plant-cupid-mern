@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import { clearAllAppCaches } from "../services/cache";
 
 const AuthContext = createContext(null);
 
@@ -26,15 +33,17 @@ export const AuthProvider = ({ children }) => {
   }, []); // on component mount, check if there is a token and user data in localStorage and set them in state, then set loading to false
 
   const login = useCallback((userData, authToken) => {
+    clearAllAppCaches();
     localStorage.setItem("token", authToken);
     localStorage.setItem("user", JSON.stringify(userData));
     setToken(authToken);
     setUser(userData);
-  }, []); // when login the token and user data are stored in localStorage and set in state
+  }, []); // when login the token and user data are stored in localStorage and set in state 
 
   const logout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    clearAllAppCaches();
     setToken(null);
     setUser(null);
   }, []); // when logout the storage is cleared and the user and token are set null
