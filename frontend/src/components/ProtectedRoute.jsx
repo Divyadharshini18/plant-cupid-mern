@@ -17,7 +17,7 @@ export default function ProtectedRoute({ children }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />; // if user is not logged in, redirect to login page
+    return <Navigate to="/" replace />; // if user is not logged in, redirect to login page
   }
 
   return children; // user is logged in - render the page they wanted
