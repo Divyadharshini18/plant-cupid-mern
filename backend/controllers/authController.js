@@ -1,5 +1,6 @@
 const User = require("../models/User"); // Mongoose model for User
 const jwt = require("jsonwebtoken"); // used for stateless authentication 
+const sendWelcomeEmail = require("../utils/sendWelcomeEmail");
 
 const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" }); // jwt.sign(payload, secret, options)
@@ -15,6 +16,12 @@ const signupUser = async (req, res) => {
 
     const user = await User.create({ name, email, password });
 
+    try {
+      await sendWelcomeEmail(user.name, user.email);
+    } catch (emailError) {
+      console.error("Welcome email failed:", emailError.message);
+    }
+    
     res.status(201).json({ 
       _id: user._id,
       name: user.name,
