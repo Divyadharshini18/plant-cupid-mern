@@ -23,6 +23,11 @@ const userPlantSchema = new Schema(
         date: { type: Date, required: true },
       },
     ],
+
+    lastReminderSent: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
