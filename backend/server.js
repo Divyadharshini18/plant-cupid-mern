@@ -27,8 +27,8 @@ app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/plants", require("./routes/plantRoutes"));
 app.use("/api/user-plants", require("./routes/userPlantRoutes"));
 app.use("/api/images", require("./routes/imageRoutes"));
-cron.schedule("* * * * *", async () => {
-  console.log("Running reminder check...");
+cron.schedule("0 9 * * *", async () => {
+  console.log("Running daily water reminder check...");
   await checkWaterReminders();
 });
 

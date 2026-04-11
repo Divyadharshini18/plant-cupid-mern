@@ -98,6 +98,7 @@ exports.waterPlant = async (req, res) => {
   }
 
   userPlant.wateredHistory.push({ date: new Date() });
+  userPlant.lastReminderSent = null;
   await userPlant.save();
 
   res.json({
