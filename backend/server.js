@@ -2,6 +2,8 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const cron = require("node-cron");
+const checkWaterReminders = require("./utils/checkWaterReminders");
 
 dotenv.config();
 connectDB();
@@ -25,6 +27,10 @@ app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/plants", require("./routes/plantRoutes"));
 app.use("/api/user-plants", require("./routes/userPlantRoutes"));
 app.use("/api/images", require("./routes/imageRoutes"));
+cron.schedule("* * * * *", async () => {
+  console.log("Running reminder check...");
+  await checkWaterReminders();
+});
 
 const PORT = process.env.PORT || 5000;
 
