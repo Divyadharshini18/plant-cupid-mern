@@ -20,3 +20,12 @@ export const refreshProfile = async (token) => {
   clearProfileCache();
   return getProfile(token, { force: true });
 };
+
+export const deleteAccount = async (token) => {
+  const res = await api.delete("/users/profile", getAuthHeaders(token));
+
+  // clear cache after deletion
+  clearProfileCache();
+
+  return res.data;
+};

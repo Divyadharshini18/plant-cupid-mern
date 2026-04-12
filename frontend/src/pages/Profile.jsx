@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import { getProfile } from "../services/userService";
+import { getProfile, deleteAccount } from "../services/userService";
 import { getUserPlants } from "../services/plantService";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
-  const { token, isAuthenticated } = useAuth();
+  const { token, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
   const [userPlants, setUserPlants] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   const getToken = () => token || localStorage.getItem("token");
 
@@ -39,7 +42,36 @@ function Profile() {
     if (isAuthenticated) fetchProfileData();
   }, [isAuthenticated]);
 
-  // -------- WATER LOG --------
+  const handleDeleteAccount = async () => {
+    const storedToken = getToken();
+
+    if (!storedToken) {
+      setError("Please login again.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete your account? This will permanently remove your profile and your plant data."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeleting(true);
+      setError("");
+
+      await deleteAccount(storedToken);
+
+      logout();
+      navigate("/");
+    } catch (err) {
+      setError(
+        err?.response?.data?.message || "Failed to delete account."
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const waterLogs = userPlants.flatMap((plant) =>
     (plant.wateredHistory || []).map((entry) => ({
@@ -67,14 +99,26 @@ function Profile() {
   return (
     <div className="profile-page">
       <div className="dashboard-container">
-        <div className="dashboard-hero-main profile-hero">
-          <h1 className="dashboard-heading">{user?.name}</h1>
-          <p className="dashboard-text">{user?.email}</p>
-          <p className="profile-subtext">
-            You have {userPlants.length} plants in your care 🌱
-          </p>
+        <div className="dashboard-hero-main profile-hero profile-hero-row">
+          <div className="profile-hero-left">
+            <h1 className="dashboard-heading">{user?.name}</h1>
+            <p className="dashboard-text">{user?.email}</p>
+            <p className="profile-subtext">
+              You have {userPlants.length} plants in your care 🌱
+            </p>
+          </div>
+
+          <div className="profile-hero-right">
+            <button
+              className="delete-account-btn"
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+            >
+              {deleting ? "Deleting..." : "Delete Account"}
+            </button>
+          </div>
         </div>
-        
+
         {error && <div className="dashboard-message error">{error}</div>}
 
         <div className="dashboard-panel">
