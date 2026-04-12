@@ -1,8 +1,8 @@
 import axios from "axios"; // axios promise-based http client for node.js and the browser also isomorphic
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
-}); // instance of axios with base URL
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+});
 
 api.interceptors.request.use( // interceptors are middleware for axios : runs before every request is sent
   (config) => {
